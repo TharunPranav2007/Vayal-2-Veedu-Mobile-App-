@@ -1,139 +1,196 @@
-# FarmDirect — Vayal 2 Veedu 🌾
+# 🌾 FarmDirect — Vayal 2 Veedu (വയൽ 2 വീട്)
 
-> *"From the Field to Your Home"*
+<div align="center">
 
-**Course:** U21CS503 – Mobile Application Development  
-**Platform:** Cross-Platform Mobile Application (Flutter) + Modular Backend (NestJS + PostgreSQL)
+![Flutter](https://img.shields.io/badge/Flutter-3.x-02569B?style=for-the-badge&logo=flutter&logoColor=white)
+![Dart](https://img.shields.io/badge/Dart-3.x-0175C2?style=for-the-badge&logo=dart&logoColor=white)
+![NestJS](https://img.shields.io/badge/NestJS-10.x-E0234E?style=for-the-badge&logo=nestjs&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)
+![Prisma](https://img.shields.io/badge/Prisma-5.x-2D3748?style=for-the-badge&logo=prisma&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
+
+**"Direct from the Farmer's Field (Vayal) to Your Home (Veedu)"**
+
+*A Production-Grade, Cross-Platform Digital Agriculture Marketplace connecting Farmers, Consumers, Delivery Partners, and Platform Administrators in Real-Time.*
+
+</div>
+
+---
+
+## 📖 Table of Contents
+- [📌 Project Overview](#-project-overview)
+- [⚡ Key Features & Multi-Role Sync](#-key-features--multi-role-sync)
+- [📐 System Architecture & Order Lifecycle](#-system-architecture--order-lifecycle)
+- [🎨 UI & Design System](#-ui--design-system)
+- [🛠️ Technology Stack](#️-technology-stack)
+- [🚀 Quick Start & Installation](#-quick-start--installation)
+- [👥 Team Collaboration & GitHub Workflow](#-team-collaboration--github-workflow)
+- [🗄️ Database Schema](#️-database-schema)
+- [🎓 Course Information](#-course-information)
 
 ---
 
 ## 📌 Project Overview
 
-**FarmDirect (Vayal 2 Veedu)** is a full-stack, direct farmer-to-consumer digital marketplace designed to bridge the gap between agricultural growers and households. By eliminating traditional multi-tiered middlemen, the platform empowers farmers with direct market access, fair pricing, and automated order fulfillment, while providing consumers with fresh, traceable produce at transparent prices.
+**FarmDirect (Vayal 2 Veedu)** is an end-to-end digital marketplace engineered to eliminate traditional multi-tiered agricultural intermediaries. By connecting growers directly with households, the platform ensures:
+- **For Farmers:** Fair pricing, 100% direct revenue retention, and automated order management.
+- **For Consumers:** Fresh, pesticide-free, traceable farm produce at fair market prices.
+- **For Delivery Partners:** Real-time job dispatches with optimized route coordinates.
+- **For Administrators:** System-wide transaction oversight, user verification, and catalog moderation.
 
 ---
 
-## 🎯 Problem Statement & Objectives
+## ⚡ Key Features & Multi-Role Sync
 
-### Problem Addressed:
-1. **Dependency on Intermediaries:** Farmers lose up to 50% of produce value to supply chain middlemen.
-2. **Reduced Farmer Margins:** High distribution costs shrink agricultural profit margins.
-3. **Consumer Price Inflation:** Retail markups artificially inflate fresh produce prices.
-4. **Lack of Transparency:** Consumers cannot verify produce freshness, origin, or farmer identity.
-5. **Supply Chain Friction:** Outdated manual order tracking and distribution inefficiencies.
-
-### Core Objectives:
-- Eliminate agricultural intermediaries through a direct digital marketplace.
-- Provide real-time price, stock, and produce origin transparency.
-- Streamline direct order placement, real-time delivery tracking, and automated fulfillment.
-- Support role-based workflows for Farmers, Consumers, Delivery Partners, and Platform Administrators.
+| Role | Symbol | Core Features & Functionality |
+| :--- | :---: | :--- |
+| **Farmer** | 🌾 | • Add & edit produce listings with custom pricing, units & stock<br>• Realtime business analytics (Total Revenue, Active Produce count)<br>• Incoming order dispatch queue with 1-tap order acceptance |
+| **Consumer** | 🛒 | • Interactive produce catalog with search & category filtering (`Vegetables`, `Greens`, `Fruits`, `Grains`)<br>• Dynamic shopping cart with live GST (5%) & delivery calculation<br>• Real-time animated order fulfillment timeline |
+| **Delivery Partner** | 🛵 | • Available job dispatch queue with farm pickup & house dropoff coordinates<br>• Live milestone status toggles (`Pick Up & Start` ➔ `Mark Delivered`)<br>• Daily completion counter & earnings summary |
+| **Administrator** | 🛡️ | • Platform-wide GMV & order metrics dashboard<br>• Farmer account verification & product catalog moderation<br>• Real-time system health oversight |
 
 ---
 
-## 👥 User Roles & Capabilities
+## 📐 System Architecture & Order Lifecycle
 
-| Role | Symbol | Key Capabilities |
-| :--- | :--- | :--- |
-| **Farmer** | 🌾 `FARMER` | Add/manage produce listings, set pricing & stock, manage farm profile, process received orders, view sales metrics. |
-| **Consumer** | 🛒 `CONSUMER` | Search & filter produce, add items to cart, server-validated checkout, track order status in real-time, submit reviews. |
-| **Delivery Partner** | 🚚 `DELIVERY_PARTNER` | View assigned delivery jobs, accept pickup requests, navigate delivery routes, update delivery milestones. |
-| **Administrator** | 🛡️ `ADMIN` | Oversee system-wide metrics, manage users, moderate produce catalog, inspect platform-wide order activities. |
+```mermaid
+graph TD
+    A[🌾 FARMER] -->|Publishes Produce| B(📦 Central Inventory Store)
+    B -->|Real-time Marketplace Feed| C[🛒 CONSUMER]
+    C -->|Places Order & Deducts Stock| D(🚚 Central Dispatch Pipeline)
+    D -->|Incoming Order Notification| A
+    D -->|Available Delivery Job| E[🛵 DELIVERY PARTNER]
+    E -->|Updates Status: Out for Delivery / Delivered| F[📍 CONSUMER TRACKING TIMELINE]
+    D & B -->|Real-time Metrics Stream| G[🛡️ ADMIN DASHBOARD]
+```
+
+### 🔄 Multi-Role Realtime Sync Flow:
+1. **Listing Creation:** A Farmer lists produce ➔ Immediately visible on Consumer Home.
+2. **Order Placement:** A Consumer checks out ➔ Inventory stock decrements ➔ Order dispatches to Farmer & Delivery Partner dashboards.
+3. **Fulfillment:** Delivery Partner marks *"Out for Delivery"* ➔ Consumer's Live Order Tracking timeline updates in real-time!
+
+---
+
+## 🎨 UI & Design System
+
+The app follows Google's **Material 3** design system tailored with the **Vayal 2 Veedu** agricultural visual identity:
+
+- **Primary Colors:**
+  - 🟢 **Agricultural Green (`#1E5631`):** Represents fresh fields, growth, and trust.
+  - 📙 **Fresh Harvest Orange (`#F9690E`):** Accents buy buttons, badges, and status alerts.
+  - ⚪ **Warm Surface White (`#FAFAFA`):** Clean background contrast.
+- **Typography:** Google Fonts (`Outfit` for display headings, `Inter` for body copy).
+- **Visual Micro-Interactions:** Glassmorphic badges, card shadows, rating chips, and status progress bars.
 
 ---
 
 ## 🛠️ Technology Stack
 
-### Mobile Client (Flutter)
+### **Mobile App (Flutter)**
 - **Framework:** Flutter 3.x (Dart 3.x)
-- **UI System:** Material 3 with "Vayal 2 Veedu" brand identity (Agricultural Green `#1E5631`, Fresh Orange `#F9690E`, Warm White `#FAFAFA`).
-- **State Management:** Riverpod 2.x (`AsyncNotifier`, `ProviderScope`).
-- **Navigation:** `go_router` declarative routing with dynamic role-based guards.
-- **Networking:** Dio HTTP client with JWT interceptors.
-- **Local Storage:** `flutter_secure_storage` for token security.
+- **State Management:** Riverpod 2.x (`StateNotifierProvider`, `ProviderScope`)
+- **Routing:** `go_router` 13.x with declarative role guards
+- **HTTP Client:** Dio 5.x with JSON serializable models
+- **Icons & Fonts:** Google Fonts & Cupertino Icons
 
-### Backend Infrastructure (NestJS)
-- **Framework:** NestJS (TypeScript / Node.js) with modular dependency injection.
-- **Database & ORM:** PostgreSQL + Prisma ORM.
-- **API Protocol:** REST API (`/api/v1/`) + Swagger OpenAPI (`/api/docs`).
-- **Real-Time Gateway:** NestJS WebSocket Gateway (Socket.IO) for live order updates.
-- **Notifications:** Firebase Cloud Messaging (FCM).
-- **Security:** JWT (Access + Refresh token rotation), Argon2 / bcrypt password hashing, Helmet, CORS, and Rate Limiting.
+### **Backend Service (NestJS)**
+- **Framework:** NestJS 10.x (TypeScript / Node.js)
+- **Database ORM:** PostgreSQL 16 + Prisma ORM
+- **API Documentation:** Swagger OpenAPI (`/api/docs`)
+- **Realtime Protocol:** Socket.IO WebSocket Gateway
+- **Security:** JWT authentication, bcrypt password hashing, Helmet, CORS
 
 ---
 
-## 📐 System Architecture
+## 🚀 Quick Start & Installation
 
-```
-[Flutter App (1 Unified Binary)]
-       │
-       ├── HTTPS REST (Dio) ────► [NestJS Controllers & Services] ────► [Prisma ORM] ──► [PostgreSQL DB]
-       ├── WebSockets (Socket.IO)► [NestJS WS Gateway] ───────────────► Live Order Rooms
-       └── FCM Push Notifications► [Firebase Admin SDK] ─────────────► Push Notification Tray
-```
+### 1. Prerequisites
+- **Flutter SDK:** v3.19+ ([Download](https://flutter.dev))
+- **Node.js:** v18+ ([Download](https://nodejs.org))
+- **Android Studio** with Android SDK 35 & Pixel 6 AVD Emulator
 
 ---
 
-## 🗄️ Database ER Diagram & Schema
+### 2. Running the Flutter Mobile App
 
-The relational schema strictly models 20 tables:
-- `users`, `farmer_profiles`, `consumer_profiles`, `delivery_profiles`
-- `categories`, `products`, `product_images`
-- `carts`, `cart_items`
-- `orders`, `order_items`, `order_status_history`, `payments`, `deliveries`
-- `reviews`, `wishlists`, `wishlist_items`, `notifications`, `device_tokens`, `addresses`
-
----
-
-## 🚀 Getting Started & Setup
-
-### Prerequisites
-- Node.js (v18+)
-- Flutter SDK (v3.19+)
-- PostgreSQL or Docker
-
-### 1. Backend Setup
 ```bash
+# Clone the repository
+git clone https://github.com/TharunPranav2007/Vayal-2-Veedu-Mobile-App-.git
+cd Vayal-2-Veedu-Mobile-App-
+
+# Install Flutter dependencies
+flutter pub get
+
+# Run on connected Android Emulator (Pixel 6)
+flutter run -d emulator-5554
+
+# Or run on Google Chrome Web
+flutter run -d chrome
+```
+
+---
+
+### 3. Running the NestJS Backend Service
+
+```bash
+# Navigate to backend directory
 cd backend
+
+# Install dependencies
 npm install
+
+# Setup environment variables
 cp .env.example .env
+
+# Generate Prisma client & run database migrations
 npx prisma generate
-npx prisma migrate dev --name init
+
+# Start NestJS development server
 npm run start:dev
 ```
-- REST API: `http://localhost:3000/api/v1`
-- Swagger OpenAPI: `http://localhost:3000/api/docs`
+- **REST API Base URL:** `http://localhost:3000/api`
+- **Swagger Documentation:** [http://localhost:3000/api/docs](http://localhost:3000/api/docs)
 
-### 2. Docker Compose (Alternative Backend Run)
+---
+
+## 👥 Team Collaboration & GitHub Workflow
+
+When collaborating with team members on this repository:
+
+### For Collaborators (Cloning & Pushing Changes):
 ```bash
-docker-compose up -d
+# 1. Clone repository
+git clone https://github.com/TharunPranav2007/Vayal-2-Veedu-Mobile-App-.git
+
+# 2. Make your code changes in Antigravity / Android Studio
+
+# 3. Commit and push to main branch
+git add .
+git commit -m "Added new feature XYZ"
+git push origin main
 ```
 
-### 3. Flutter App Setup
+### For Fetching Latest Changes:
 ```bash
-flutter pub get
-flutter run
+# Always pull latest code before starting your daily work
+git pull origin main
 ```
 
 ---
 
-## 🧪 Testing Suite
+## 🗄️ Database Schema
 
-### Flutter Tests
-```bash
-flutter test
-```
-
-### Backend Tests
-```bash
-cd backend
-npm run test
-npm run test:e2e
-```
+The PostgreSQL database models 20 core relational entities:
+- `users`, `farmer_profiles`, `consumer_profiles`, `delivery_profiles`
+- `categories`, `products`, `product_images`
+- `carts`, `cart_items`, `orders`, `order_items`, `deliveries`
+- `reviews`, `wishlists`, `notifications`, `addresses`
 
 ---
 
-## 📋 Course & Team Information
+## 🎓 Course Information
 
 - **Course:** U21CS503 – Mobile Application Development
-- **Project:** FarmDirect ("Vayal 2 Veedu")
-- **Review:** Review 1 & Final Capstone Implementation
+- **Application Name:** FarmDirect ("Vayal 2 Veedu")
+- **Repository:** [`TharunPranav2007/Vayal-2-Veedu-Mobile-App-`](https://github.com/TharunPranav2007/Vayal-2-Veedu-Mobile-App-)
+- **License:** MIT License
