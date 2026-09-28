@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../products/domain/product_model.dart';
+import '../../../app/providers/products_provider.dart';
+import '../../../app/providers/cart_provider.dart';
 
 class ConsumerHomeScreen extends ConsumerStatefulWidget {
   const ConsumerHomeScreen({super.key});
@@ -17,101 +18,173 @@ class _ConsumerHomeScreenState extends ConsumerState<ConsumerHomeScreen> {
 
   final List<String> _categories = ['All', 'Vegetables', 'Greens', 'Fruits', 'Grains'];
 
-  final List<Product> _products = [
-    Product(
-      id: 'p1',
-      farmerId: 'f1',
-      farmerName: 'Green Field Farm',
-      categoryId: 'c1',
-      categoryName: 'Vegetables',
-      name: 'Country Tomatoes',
-      description: 'Fresh farm-picked organic tomatoes',
-      price: 40.0,
-      unit: 'kg',
-      stock: 100.0,
-      averageRating: 4.8,
-      totalReviews: 24,
-    ),
-    Product(
-      id: 'p2',
-      farmerId: 'f2',
-      farmerName: 'Vayal Fresh Produce',
-      categoryId: 'c2',
-      categoryName: 'Greens',
-      name: 'Organic Palak (Spinach)',
-      description: 'Pesticide free leafy spinach',
-      price: 25.0,
-      unit: 'bunch',
-      stock: 45.0,
-      averageRating: 4.9,
-      totalReviews: 12,
-    ),
-    Product(
-      id: 'p3',
-      farmerId: 'f1',
-      farmerName: 'Green Field Farm',
-      categoryId: 'c1',
-      categoryName: 'Vegetables',
-      name: 'Fresh Carrots',
-      description: 'Crisp orange organic carrots',
-      price: 60.0,
-      unit: 'kg',
-      stock: 50.0,
-      averageRating: 4.7,
-      totalReviews: 18,
-    ),
-    Product(
-      id: 'p4',
-      farmerId: 'f3',
-      farmerName: 'Kaveri River Farms',
-      categoryId: 'c3',
-      categoryName: 'Fruits',
-      name: 'Sweet Farm Bananas',
-      description: 'Naturally ripened Cavendish bananas',
-      price: 50.0,
-      unit: 'dozen',
-      stock: 30.0,
-      averageRating: 4.6,
-      totalReviews: 9,
-    ),
-  ];
-
   @override
   Widget build(BuildContext context) {
-    final filteredProducts = _products.where((p) {
-      final matchesCat = _selectedCategory == 'All' || p.categoryName == _selectedCategory;
-      final matchesSearch = p.name.toLowerCase().contains(_searchQuery.toLowerCase());
+    final products = ref.watch(productsProvider);
+    final cartState = ref.watch(cartProvider);
+
+    final filteredProducts = products.where((p) {
+      final matchesCat = _selectedCategory == 'All' ||
+          p.categoryName.toLowerCase().contains(_selectedCategory.toLowerCase());
+      final matchesSearch = p.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+          p.farmerName.toLowerCase().contains(_searchQuery.toLowerCase());
       return matchesCat && matchesSearch;
     }).toList();
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Vayal 2 Veedu'),
+        title: Row(
+          children: [
+            const Icon(Icons.agriculture_rounded, color: Colors.white, size: 28),
+            const SizedBox(width: 8),
+            Text(
+              'Vayal 2 Veedu',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+          ],
+        ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.shopping_cart_outlined),
-            onPressed: () => context.push('/consumer/cart'),
+          Stack(
+            alignment: Alignment.center,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.shopping_cart_outlined, size: 26),
+                onPressed: () => context.push('/consumer/cart'),
+              ),
+              if (cartState.itemCount > 0)
+                Positioned(
+                  right: 6,
+                  top: 6,
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: const BoxDecoration(
+                      color: AppColors.secondaryOrange,
+                      shape: BoxShape.circle,
+                    ),
+                    constraints: const BoxConstraints(
+                      minWidth: 18,
+                      minHeight: 18,
+                    ),
+                    child: Text(
+                      '${cartState.itemCount}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+            ],
           ),
           IconButton(
-            icon: const Icon(Icons.account_circle_outlined),
+            icon: const Icon(Icons.local_shipping_outlined, size: 24),
+            tooltip: 'Track Active Orders',
+            onPressed: () => context.push('/consumer/orders/track'),
+          ),
+          IconButton(
+            icon: const Icon(Icons.account_circle_outlined, size: 26),
             onPressed: () => context.push('/profile'),
           ),
         ],
       ),
       body: CustomScrollView(
         slivers: [
-          // Search & Filter Header
+          // Farm Header Hero Banner
+          SliverToBoxAdapter(
+            child: Container(
+              margin: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [AppColors.primaryDarkGreen, AppColors.primaryGreen],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.primaryGreen.withOpacity(0.25),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: AppColors.secondaryOrange,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: const Text(
+                            '🌾 100% Direct Farm Fresh',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        const Text(
+                          'Fresh Harvest Delivered To Your Doorstep',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            height: 1.2,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        const Text(
+                          'Zero Middlemen • Fair Pricing for Farmers',
+                          style: TextStyle(color: Colors.white70, fontSize: 12),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Container(
+                    width: 70,
+                    height: 70,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.15),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.eco_rounded, color: AppColors.accentGreen, size: 44),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // Search Bar & Categories
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Column(
                 children: [
                   TextField(
                     onChanged: (val) => setState(() => _searchQuery = val),
                     decoration: InputDecoration(
-                      hintText: 'Search fresh produce or local farms...',
+                      hintText: 'Search organic veggies, fruits, grains...',
                       prefixIcon: const Icon(Icons.search, color: AppColors.primaryGreen),
-                      suffixIcon: const Icon(Icons.tune, color: AppColors.primaryGreen),
+                      suffixIcon: _searchQuery.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.clear),
+                              onPressed: () => setState(() => _searchQuery = ''),
+                            )
+                          : null,
                       filled: true,
                       fillColor: Colors.white,
                       border: OutlineInputBorder(
@@ -120,7 +193,7 @@ class _ConsumerHomeScreenState extends ConsumerState<ConsumerHomeScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 14),
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: Row(
@@ -132,6 +205,7 @@ class _ConsumerHomeScreenState extends ConsumerState<ConsumerHomeScreen> {
                             label: Text(cat),
                             selected: isSelected,
                             selectedColor: AppColors.primaryGreen,
+                            backgroundColor: Colors.white,
                             labelStyle: TextStyle(
                               color: isSelected ? Colors.white : AppColors.textDark,
                               fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
@@ -142,106 +216,212 @@ class _ConsumerHomeScreenState extends ConsumerState<ConsumerHomeScreen> {
                       }).toList(),
                     ),
                   ),
+                  const SizedBox(height: 14),
                 ],
               ),
             ),
           ),
-          // Product Grid
-          SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            sliver: SliverGrid(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                childAspectRatio: 0.72,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-              ),
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  final p = filteredProducts[index];
-                  return Card(
-                    clipBehavior: Clip.antiAlias,
+
+          // Marketplace Products Grid
+          filteredProducts.isEmpty
+              ? SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: Center(
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          height: 110,
-                          color: AppColors.surfaceSubtleGreen,
-                          child: const Center(
-                            child: Icon(Icons.eco_rounded, size: 48, color: AppColors.primaryGreen),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(10),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                p.name,
-                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                p.farmerName,
-                                style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
-                              ),
-                              const SizedBox(height: 6),
-                              Row(
-                                children: [
-                                  const Icon(Icons.star, color: Colors.amber, size: 14),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    '${p.averageRating} (${p.totalReviews})',
-                                    style: const TextStyle(fontSize: 12),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 8),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    '₹${p.price}/${p.unit}',
-                                    style: const TextStyle(
-                                      color: AppColors.primaryGreen,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                  InkWell(
-                                    onTap: () {
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(
-                                          content: Text('${p.name} added to cart!'),
-                                          duration: const Duration(seconds: 1),
-                                          backgroundColor: AppColors.primaryGreen,
-                                        ),
-                                      );
-                                    },
-                                    child: Container(
-                                      padding: const EdgeInsets.all(6),
-                                      decoration: BoxDecoration(
-                                        color: AppColors.secondaryOrange,
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: const Icon(Icons.add_shopping_cart, color: Colors.white, size: 16),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: const [
+                        Icon(Icons.inventory_2_outlined, size: 64, color: AppColors.textMuted),
+                        SizedBox(height: 12),
+                        Text(
+                          'No produce found in this category.',
+                          style: TextStyle(color: AppColors.textMuted, fontSize: 16),
                         ),
                       ],
                     ),
-                  );
-                },
-                childCount: filteredProducts.length,
-              ),
-            ),
-          ),
+                  ),
+                )
+              : SliverPadding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  sliver: SliverGrid(
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      childAspectRatio: 0.70,
+                      crossAxisSpacing: 14,
+                      mainAxisSpacing: 14,
+                    ),
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) {
+                        final p = filteredProducts[index];
+                        final isInStock = p.stock > 0;
+
+                        return Card(
+                          clipBehavior: Clip.antiAlias,
+                          elevation: 2,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Product Thumbnail Container
+                              Stack(
+                                children: [
+                                  Container(
+                                    height: 110,
+                                    width: double.infinity,
+                                    color: AppColors.surfaceSubtleGreen,
+                                    child: Center(
+                                      child: Icon(
+                                        p.categoryName == 'Greens'
+                                            ? Icons.grass
+                                            : p.categoryName == 'Fruits'
+                                                ? Icons.apple
+                                                : p.categoryName == 'Grains'
+                                                    ? Icons.grain
+                                                    : Icons.eco,
+                                        size: 52,
+                                        color: AppColors.primaryGreen,
+                                      ),
+                                    ),
+                                  ),
+                                  Positioned(
+                                    top: 8,
+                                    left: 8,
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                      decoration: BoxDecoration(
+                                        color: Colors.black.withOpacity(0.6),
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          const Icon(Icons.star, color: Colors.amber, size: 12),
+                                          const SizedBox(width: 3),
+                                          Text(
+                                            '${p.averageRating}',
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  if (!isInStock)
+                                    Container(
+                                      height: 110,
+                                      color: Colors.black.withOpacity(0.5),
+                                      alignment: Alignment.center,
+                                      child: const Text(
+                                        'SOLD OUT',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                          letterSpacing: 1,
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.all(10),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      p.name,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 13,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Row(
+                                      children: [
+                                        const Icon(Icons.storefront_outlined, size: 12, color: AppColors.textMuted),
+                                        const SizedBox(width: 3),
+                                        Expanded(
+                                          child: Text(
+                                            p.farmerName,
+                                            style: const TextStyle(
+                                              color: AppColors.textMuted,
+                                              fontSize: 11,
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 6),
+                                    Text(
+                                      'Stock: ${p.stock.toStringAsFixed(0)} ${p.unit}',
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        color: p.stock < 10 ? AppColors.error : AppColors.primaryLightGreen,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          '₹${p.price.toStringAsFixed(0)}/${p.unit}',
+                                          style: const TextStyle(
+                                            color: AppColors.primaryGreen,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                        InkWell(
+                                          onTap: isInStock
+                                              ? () {
+                                                  ref.read(cartProvider.notifier).addToCart(p);
+                                                  ScaffoldMessenger.of(context).showSnackBar(
+                                                    SnackBar(
+                                                      content: Text('${p.name} added to cart!'),
+                                                      duration: const Duration(milliseconds: 1200),
+                                                      backgroundColor: AppColors.primaryGreen,
+                                                      action: SnackBarAction(
+                                                        label: 'VIEW CART',
+                                                        textColor: Colors.white,
+                                                        onPressed: () => context.push('/consumer/cart'),
+                                                      ),
+                                                    ),
+                                                  );
+                                                }
+                                              : null,
+                                          child: Container(
+                                            padding: const EdgeInsets.all(6),
+                                            decoration: BoxDecoration(
+                                              color: isInStock ? AppColors.secondaryOrange : Colors.grey,
+                                              borderRadius: BorderRadius.circular(8),
+                                            ),
+                                            child: const Icon(
+                                              Icons.add_shopping_cart,
+                                              color: Colors.white,
+                                              size: 16,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                      childCount: filteredProducts.length,
+                    ),
+                  ),
+                ),
         ],
       ),
     );

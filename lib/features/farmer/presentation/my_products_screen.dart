@@ -1,66 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../products/domain/product_model.dart';
+import '../../../app/providers/products_provider.dart';
 
-class MyProductsScreen extends StatefulWidget {
+class MyProductsScreen extends ConsumerWidget {
   const MyProductsScreen({super.key});
 
   @override
-  State<MyProductsScreen> createState() => _MyProductsScreenState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final products = ref.watch(productsProvider);
 
-class _MyProductsScreenState extends State<MyProductsScreen> {
-  final List<Product> _mockProducts = [
-    Product(
-      id: 'p1',
-      farmerId: 'f1',
-      farmerName: 'Green Field Organic Farm',
-      categoryId: 'c1',
-      categoryName: 'Fresh Vegetables',
-      name: 'Organic Country Tomatoes',
-      description: 'Vine-ripened organic tomatoes harvested daily from Madurai farm.',
-      price: 40.0,
-      unit: 'kg',
-      stock: 50.0,
-      isPublished: true,
-      averageRating: 4.8,
-      totalReviews: 14,
-    ),
-    Product(
-      id: 'p2',
-      farmerId: 'f1',
-      farmerName: 'Green Field Organic Farm',
-      categoryId: 'c2',
-      categoryName: 'Fresh Greens',
-      name: 'Fresh Palak (Spinach)',
-      description: 'Pesticide-free fresh spinach leaves packed in bunches.',
-      price: 25.0,
-      unit: 'bunch',
-      stock: 30.0,
-      isPublished: true,
-      averageRating: 4.9,
-      totalReviews: 8,
-    ),
-    Product(
-      id: 'p3',
-      farmerId: 'f1',
-      farmerName: 'Green Field Organic Farm',
-      categoryId: 'c1',
-      categoryName: 'Fresh Vegetables',
-      name: 'Native Brinjal (Eggplant)',
-      description: 'Purple striped native brinjal variety rich in antioxidants.',
-      price: 35.0,
-      unit: 'kg',
-      stock: 15.0,
-      isPublished: false,
-      averageRating: 4.5,
-      totalReviews: 5,
-    ),
-  ];
-
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('My Produce Catalog'),
@@ -71,92 +21,93 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
           ),
         ],
       ),
-      body: ListView.separated(
-        padding: const EdgeInsets.all(16),
-        itemCount: _mockProducts.length,
-        separatorBuilder: (_, __) => const SizedBox(height: 12),
-        itemBuilder: (context, index) {
-          final product = _mockProducts[index];
-          return Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
+      body: products.isEmpty
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Container(
-                    width: 70,
-                    height: 70,
-                    decoration: BoxDecoration(
-                      color: AppColors.surfaceSubtleGreen,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Icon(Icons.eco, color: AppColors.primaryGreen, size: 36),
+                  const Icon(Icons.inventory_2_outlined, size: 64, color: AppColors.textMuted),
+                  const SizedBox(height: 12),
+                  const Text('No produce listed yet'),
+                  const SizedBox(height: 16),
+                  ElevatedButton.icon(
+                    onPressed: () => context.push('/farmer/products/add'),
+                    icon: const Icon(Icons.add),
+                    label: const Text('Add Produce Listing'),
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                ],
+              ),
+            )
+          : ListView.separated(
+              padding: const EdgeInsets.all(16),
+              itemCount: products.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 12),
+              itemBuilder: (context, index) {
+                final product = products[index];
+                return Card(
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
                       children: [
-                        Text(
-                          product.name,
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                        Container(
+                          width: 65,
+                          height: 65,
+                          decoration: BoxDecoration(
+                            color: AppColors.surfaceSubtleGreen,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(Icons.eco, color: AppColors.primaryGreen, size: 36),
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '₹${product.price} / ${product.unit}  •  Stock: ${product.stock} ${product.unit}',
-                          style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
-                        ),
-                        const SizedBox(height: 6),
-                        Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: product.isPublished
-                                    ? AppColors.primaryGreen.withOpacity(0.1)
-                                    : Colors.grey.withOpacity(0.2),
-                                borderRadius: BorderRadius.circular(6),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                product.name,
+                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                               ),
-                              child: Text(
-                                product.isPublished ? 'Published' : 'Draft / Off-stock',
-                                style: TextStyle(
-                                  color: product.isPublished ? AppColors.primaryGreen : Colors.grey[700],
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
+                              const SizedBox(height: 3),
+                              Text(
+                                '₹${product.price.toStringAsFixed(0)} / ${product.unit}  •  Stock: ${product.stock.toStringAsFixed(0)} ${product.unit}',
+                                style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
+                              ),
+                              const SizedBox(height: 6),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: AppColors.primaryGreen.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Text(
+                                  'Category: ${product.categoryName}',
+                                  style: const TextStyle(
+                                    color: AppColors.primaryGreen,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.delete_outline, color: AppColors.error, size: 22),
+                          tooltip: 'Delete Product',
+                          onPressed: () {
+                            ref.read(productsProvider.notifier).deleteProduct(product.id);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Removed "${product.name}" from catalog')),
+                            );
+                          },
                         ),
                       ],
                     ),
                   ),
-                  Switch(
-                    value: product.isPublished,
-                    activeColor: AppColors.primaryGreen,
-                    onChanged: (val) {
-                      setState(() {
-                        _mockProducts[index] = Product(
-                          id: product.id,
-                          farmerId: product.farmerId,
-                          farmerName: product.farmerName,
-                          categoryId: product.categoryId,
-                          categoryName: product.categoryName,
-                          name: product.name,
-                          description: product.description,
-                          price: product.price,
-                          unit: product.unit,
-                          stock: product.stock,
-                          isPublished: val,
-                        );
-                      });
-                    },
-                  ),
-                ],
-              ),
+                );
+              },
             ),
-          );
-        },
-      ),
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: AppColors.primaryGreen,
         onPressed: () => context.push('/farmer/products/add'),

@@ -1,77 +1,110 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../app/providers/orders_provider.dart';
 import '../../orders/domain/order_model.dart';
 
-class OrderTrackingScreen extends StatefulWidget {
+class OrderTrackingScreen extends ConsumerWidget {
   final String orderId;
 
   const OrderTrackingScreen({super.key, required this.orderId});
 
+  int _getStatusIndex(OrderStatus status) {
+    switch (status) {
+      case OrderStatus.PLACED:
+        return 0;
+      case OrderStatus.CONFIRMED:
+      case OrderStatus.PREPARING:
+        return 1;
+      case OrderStatus.READY_FOR_PICKUP:
+      case OrderStatus.PICKED_UP:
+        return 2;
+      case OrderStatus.OUT_FOR_DELIVERY:
+        return 3;
+      case OrderStatus.DELIVERED:
+        return 4;
+      default:
+        return 0;
+    }
+  }
+
   @override
-  State<OrderTrackingScreen> createState() => _OrderTrackingScreenState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final orders = ref.watch(ordersProvider);
+    final order = orders.firstWhere(
+      (o) => o.id == orderId || o.orderNumber == orderId,
+      orElse: () => orders.isNotEmpty ? orders.first : OrderModel(
+        id: 'ord-101',
+        orderNumber: 'ORD-8821',
+        consumerId: 'cons-1',
+        farmerId: 'f1',
+        subtotal: 100.0,
+        deliveryFee: 30.0,
+        discount: 0.0,
+        totalAmount: 135.0,
+        status: OrderStatus.CONFIRMED,
+        createdAt: DateTime.now(),
+        items: [],
+      ),
+    );
 
-class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
-  OrderStatus _currentStatus = OrderStatus.PREPARING;
+    final currentIdx = _getStatusIndex(order.status);
 
-  final List<Map<String, dynamic>> _statusSteps = [
-    {'status': OrderStatus.PLACED, 'label': 'Order Placed', 'subtitle': 'Consumer order received'},
-    {'status': OrderStatus.CONFIRMED, 'label': 'Order Confirmed', 'subtitle': 'Farmer confirmed produce availability'},
-    {'status': OrderStatus.PREPARING, 'label': 'Harvesting & Preparing', 'subtitle': 'Farmer packing fresh produce'},
-    {'status': OrderStatus.READY_FOR_PICKUP, 'label': 'Ready for Pickup', 'subtitle': 'Awaiting delivery partner pickup'},
-    {'status': OrderStatus.OUT_FOR_DELIVERY, 'label': 'Out for Delivery', 'subtitle': 'Partner delivering produce to your home'},
-    {'status': OrderStatus.DELIVERED, 'label': 'Delivered', 'subtitle': 'Produce delivered to doorstep'},
-  ];
+    final statusSteps = [
+      {'title': 'Order Placed', 'subtitle': 'Sent to organic farm'},
+      {'title': 'Confirmed & Harvested', 'subtitle': 'Farmer packing fresh produce'},
+      {'title': 'Picked Up by Delivery', 'subtitle': 'Partner arrived at local farm'},
+      {'title': 'Out for Delivery', 'subtitle': 'On the way to your doorstep'},
+      {'title': 'Delivered', 'subtitle': 'Enjoy your direct farm produce!'},
+    ];
 
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Track Order #${widget.orderId}'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Order status refreshed from server.')),
-              );
-            },
-          ),
-        ],
+        title: Text('Track Order #${order.orderNumber}'),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Status Card
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: AppColors.surfaceSubtleGreen,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.primaryGreen.withOpacity(0.2)),
+                gradient: const LinearGradient(
+                  colors: [AppColors.surfaceSubtleGreen, Colors.white],
+                ),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: AppColors.primaryGreen.withOpacity(0.3)),
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.local_shipping, color: AppColors.primaryGreen, size: 36),
-                  const SizedBox(width: 12),
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: const BoxDecoration(
+                      color: AppColors.primaryGreen,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.local_shipping, color: Colors.white, size: 28),
+                  ),
+                  const SizedBox(width: 14),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Current Status: ${_currentStatus.name.replaceAll('_', ' ')}',
+                          'Status: ${order.status.name.replaceAll('_', ' ')}',
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             color: AppColors.primaryGreen,
-                            fontSize: 15,
+                            fontSize: 16,
                           ),
                         ),
-                        const SizedBox(height: 2),
-                        const Text(
-                          'Estimated Delivery: Today by 5:30 PM',
-                          style: TextStyle(color: AppColors.textMuted, fontSize: 13),
+                        const SizedBox(height: 3),
+                        Text(
+                          'Total Payable: ₹${order.totalAmount.toStringAsFixed(2)}',
+                          style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
                         ),
                       ],
                     ),
@@ -79,17 +112,20 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
                 ],
               ),
             ),
+
             const SizedBox(height: 24),
             Text(
-              'Real-Time Fulfillment Timeline',
+              'Real-Time Dispatch Timeline',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
-            ..._statusSteps.asMap().entries.map((entry) {
+
+            // Timeline Steps
+            ...statusSteps.asMap().entries.map((entry) {
               final idx = entry.key;
               final step = entry.value;
-              final isDone = idx <= 2; // Simulated status step
-              final isCurrent = idx == 2;
+              final isDone = idx <= currentIdx;
+              final isCurrent = idx == currentIdx;
 
               return Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -103,10 +139,10 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
                             ? const Icon(Icons.check, size: 16, color: Colors.white)
                             : Text('${idx + 1}', style: const TextStyle(fontSize: 12, color: Colors.black54)),
                       ),
-                      if (idx < _statusSteps.length - 1)
+                      if (idx < statusSteps.length - 1)
                         Container(
                           width: 2,
-                          height: 40,
+                          height: 42,
                           color: isDone ? AppColors.primaryGreen : Colors.grey[300],
                         ),
                     ],
@@ -119,7 +155,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            step['label'],
+                            step['title']!,
                             style: TextStyle(
                               fontWeight: isCurrent ? FontWeight.bold : FontWeight.w600,
                               color: isDone ? AppColors.textDark : AppColors.textMuted,
@@ -127,7 +163,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
                             ),
                           ),
                           Text(
-                            step['subtitle'],
+                            step['subtitle']!,
                             style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
                           ),
                           const SizedBox(height: 16),
@@ -138,11 +174,12 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
                 ],
               );
             }),
+
             const SizedBox(height: 24),
             ElevatedButton.icon(
               onPressed: () => context.go('/consumer/home'),
               icon: const Icon(Icons.home),
-              label: const Text('Back to Home'),
+              label: const Text('Return to Home'),
             ),
           ],
         ),

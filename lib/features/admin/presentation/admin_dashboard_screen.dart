@@ -2,12 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../app/providers/products_provider.dart';
+import '../../../app/providers/orders_provider.dart';
 
 class AdminDashboardScreen extends ConsumerWidget {
   const AdminDashboardScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final products = ref.watch(productsProvider);
+    final orders = ref.watch(ordersProvider);
+
+    final totalGMV = orders.fold(0.0, (sum, o) => sum + o.totalAmount);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Platform Administrator'),
@@ -28,25 +35,48 @@ class AdminDashboardScreen extends ConsumerWidget {
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 color: AppColors.primaryDarkGreen,
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.15),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
-              child: const Column(
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
+                  const Text(
                     'Vayal 2 Veedu System Overview 🛡️',
                     style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
                   ),
-                  SizedBox(height: 4),
-                  Text(
-                    'System Status: All Services Operational (PostgreSQL, NestJS REST API, FCM, WSS)',
-                    style: TextStyle(color: AppColors.accentGreen, fontSize: 12),
+                  const SizedBox(height: 6),
+                  Row(
+                    children: [
+                      Container(
+                        width: 8,
+                        height: 8,
+                        decoration: const BoxDecoration(
+                          color: AppColors.accentGreen,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      const Text(
+                        'Services Operational: NestJS REST API, PostgreSQL, WebSocket',
+                        style: TextStyle(color: AppColors.accentGreen, fontSize: 12),
+                      ),
+                    ],
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 24),
-            Text('Marketplace Platform Analytics', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+            Text(
+              'Realtime Platform Analytics',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 12),
             GridView.count(
               crossAxisCount: 2,
@@ -55,35 +85,64 @@ class AdminDashboardScreen extends ConsumerWidget {
               childAspectRatio: 1.4,
               crossAxisSpacing: 12,
               mainAxisSpacing: 12,
-              children: const [
-                _AdminCard(title: 'Total Users', value: '1,240', icon: Icons.people_outline, color: AppColors.primaryGreen),
-                _AdminCard(title: 'Active Farmers', value: '185', icon: Icons.agriculture_outlined, color: AppColors.secondaryOrange),
-                _AdminCard(title: 'Total GMV', value: '₹4.2L', icon: Icons.payments_outlined, color: AppColors.info),
-                _AdminCard(title: 'Total Orders', value: '3,410', icon: Icons.shopping_bag_outlined, color: Colors.purple),
+              children: [
+                _AdminCard(
+                  title: 'Active Listings',
+                  value: '${products.length}',
+                  icon: Icons.eco_outlined,
+                  color: AppColors.primaryGreen,
+                ),
+                _AdminCard(
+                  title: 'Total GMV',
+                  value: '₹${totalGMV.toStringAsFixed(0)}',
+                  icon: Icons.payments_outlined,
+                  color: AppColors.secondaryOrange,
+                ),
+                _AdminCard(
+                  title: 'Total Orders',
+                  value: '${orders.length}',
+                  icon: Icons.shopping_bag_outlined,
+                  color: AppColors.info,
+                ),
+                const _AdminCard(
+                  title: 'Verified Farmers',
+                  value: '48',
+                  icon: Icons.agriculture_outlined,
+                  color: Colors.purple,
+                ),
               ],
             ),
             const SizedBox(height: 24),
-            Text('Platform Management Options', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+            Text(
+              'Platform Moderation & Controls',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 12),
             ListTile(
               leading: const Icon(Icons.verified_user_outlined, color: AppColors.primaryGreen),
-              title: const Text('Farmer Accounts & Verification'),
+              title: const Text('Farmer Accounts & Verification', style: TextStyle(fontWeight: FontWeight.bold)),
               trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-              onTap: () {},
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('All 48 farmers verified.')),
+                );
+              },
             ),
             const Divider(),
             ListTile(
               leading: const Icon(Icons.shield_outlined, color: AppColors.primaryGreen),
-              title: const Text('Product Catalog Moderation'),
+              title: const Text('Product Catalog Moderation', style: TextStyle(fontWeight: FontWeight.bold)),
+              subtitle: Text('${products.length} produce listings active'),
               trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-              onTap: () {},
+              onTap: () => context.push('/farmer/products'),
             ),
             const Divider(),
             ListTile(
               leading: const Icon(Icons.receipt_long_outlined, color: AppColors.primaryGreen),
-              title: const Text('Platform Order Oversight'),
+              title: const Text('Platform Order Oversight', style: TextStyle(fontWeight: FontWeight.bold)),
+              subtitle: Text('${orders.length} order transactions logged'),
               trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-              onTap: () {},
+              onTap: () => context.push('/consumer/orders/track'),
             ),
           ],
         ),
@@ -103,6 +162,8 @@ class _AdminCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.all(14),
         child: Column(

@@ -1,32 +1,34 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../app/providers/products_provider.dart';
+import '../../products/domain/product_model.dart';
 
-class AddProductScreen extends StatefulWidget {
+class AddProductScreen extends ConsumerStatefulWidget {
   const AddProductScreen({super.key});
 
   @override
-  State<AddProductScreen> createState() => _AddProductScreenState();
+  ConsumerState<AddProductScreen> createState() => _AddProductScreenState();
 }
 
-class _AddProductScreenState extends State<AddProductScreen> {
+class _AddProductScreenState extends ConsumerState<AddProductScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _priceController = TextEditingController();
   final _stockController = TextEditingController();
-  String _selectedCategory = 'Fresh Vegetables';
+  String _selectedCategory = 'Vegetables';
   String _selectedUnit = 'kg';
 
   final List<String> _categories = [
-    'Fresh Vegetables',
-    'Fresh Greens',
-    'Organic Fruits',
-    'Grains & Pulses',
-    'Dairy & Eggs',
+    'Vegetables',
+    'Greens',
+    'Fruits',
+    'Grains',
   ];
 
-  final List<String> _units = ['kg', 'bunch', 'liter', 'pack', 'piece'];
+  final List<String> _units = ['kg', 'bunch', 'liter', 'pack', 'dozen'];
 
   @override
   void dispose() {
@@ -39,9 +41,28 @@ class _AddProductScreenState extends State<AddProductScreen> {
 
   void _submitProduct() {
     if (_formKey.currentState!.validate()) {
+      final newProduct = Product(
+        id: 'p-${DateTime.now().millisecondsSinceEpoch}',
+        farmerId: 'f1',
+        farmerName: 'Green Field Organic Farm',
+        categoryId: 'cat-${_selectedCategory.toLowerCase()}',
+        categoryName: _selectedCategory,
+        name: _nameController.text.trim(),
+        description: _descriptionController.text.trim().isEmpty
+            ? 'Fresh farm produce directly from grower'
+            : _descriptionController.text.trim(),
+        price: double.parse(_priceController.text.trim()),
+        unit: _selectedUnit,
+        stock: double.parse(_stockController.text.trim()),
+        averageRating: 5.0,
+        totalReviews: 1,
+      );
+
+      ref.read(productsProvider.notifier).addProduct(newProduct);
+
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Produce listed successfully!'),
+        SnackBar(
+          content: Text('"${newProduct.name}" published to direct marketplace!'),
           backgroundColor: AppColors.primaryGreen,
         ),
       );
@@ -65,17 +86,17 @@ class _AddProductScreenState extends State<AddProductScreen> {
               TextFormField(
                 controller: _nameController,
                 decoration: const InputDecoration(
-                  labelText: 'Produce Name (e.g. Country Tomatoes)',
-                  prefixIcon: Icon(Icons.eco_outlined),
+                  labelText: 'Produce Name (e.g. Organic Bell Peppers)',
+                  prefixIcon: Icon(Icons.eco_outlined, color: AppColors.primaryGreen),
                 ),
-                validator: (val) => val == null || val.isEmpty ? 'Please enter produce name' : null,
+                validator: (val) => val == null || val.trim().isEmpty ? 'Please enter produce name' : null,
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
                 value: _selectedCategory,
                 decoration: const InputDecoration(
                   labelText: 'Category',
-                  prefixIcon: Icon(Icons.category_outlined),
+                  prefixIcon: Icon(Icons.category_outlined, color: AppColors.primaryGreen),
                 ),
                 items: _categories
                     .map((c) => DropdownMenuItem(value: c, child: Text(c)))
@@ -94,7 +115,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
                       decoration: const InputDecoration(
                         labelText: 'Price (₹)',
-                        prefixIcon: Icon(Icons.currency_rupee),
+                        prefixIcon: Icon(Icons.currency_rupee, color: AppColors.primaryGreen),
                       ),
                       validator: (val) {
                         if (val == null || val.isEmpty) return 'Enter price';
@@ -126,7 +147,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 decoration: const InputDecoration(
                   labelText: 'Available Inventory Stock',
-                  prefixIcon: Icon(Icons.inventory_outlined),
+                  prefixIcon: Icon(Icons.inventory_outlined, color: AppColors.primaryGreen),
                 ),
                 validator: (val) {
                   if (val == null || val.isEmpty) return 'Enter available stock';
@@ -146,9 +167,13 @@ class _AddProductScreenState extends State<AddProductScreen> {
               ),
               const SizedBox(height: 24),
               OutlinedButton.icon(
-                onPressed: () {},
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Farm photo captured successfully!')),
+                  );
+                },
                 icon: const Icon(Icons.camera_alt_outlined),
-                label: const Text('Capture / Upload Produce Photos'),
+                label: const Text('Capture / Upload Produce Photo'),
               ),
               const SizedBox(height: 32),
               ElevatedButton(

@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../app/providers/cart_provider.dart';
+import '../../../app/providers/orders_provider.dart';
 
-class CheckoutScreen extends StatefulWidget {
+class CheckoutScreen extends ConsumerStatefulWidget {
   const CheckoutScreen({super.key});
 
   @override
-  State<CheckoutScreen> createState() => _CheckoutScreenState();
+  ConsumerState<CheckoutScreen> createState() => _CheckoutScreenState();
 }
 
-class _CheckoutScreenState extends State<CheckoutScreen> {
+class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   String _selectedPaymentMethod = 'CASH_ON_DELIVERY';
   final _addressController = TextEditingController(
     text: '12 Harvest Lane, Farm District, Madurai - 625001',
@@ -22,6 +25,27 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   }
 
   void _placeOrder() {
+    final cartState = ref.read(cartProvider);
+    final cartItems = cartState.items.values.toList();
+
+    if (cartItems.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Cart is empty. Add items before placing an order.')),
+      );
+      return;
+    }
+
+    ref.read(ordersProvider.notifier).placeOrderFromCart(
+          consumerId: 'cons-1',
+          cartItems: cartItems,
+          subtotal: cartState.subtotal,
+          deliveryFee: cartState.deliveryFee,
+          taxAmount: cartState.taxAmount,
+          totalAmount: cartState.totalAmount,
+          deliveryAddress: _addressController.text,
+          paymentMethod: _selectedPaymentMethod,
+        );
+
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -31,19 +55,19 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           children: [
             Icon(Icons.check_circle, color: AppColors.primaryGreen, size: 30),
             SizedBox(width: 10),
-            Text('Order Confirmed!'),
+            Text('Order Dispatched!'),
           ],
         ),
         content: const Text(
-          'Your order ORD-1001 has been sent to the farmer. You can track live delivery updates in real-time.',
+          'Your order has been sent to the farmer and delivery partner! Inventory stock has been locked.',
         ),
         actions: [
           ElevatedButton(
             onPressed: () {
               Navigator.pop(ctx);
-              context.go('/consumer/tracking?orderId=ORD-1001');
+              context.go('/consumer/orders/track');
             },
-            child: const Text('Track Order Status'),
+            child: const Text('Track Order Timeline'),
           ),
         ],
       ),
@@ -52,6 +76,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final cartState = ref.watch(cartProvider);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Checkout Order'),
@@ -92,39 +118,55 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               value: 'TEST_PAYMENT_GATEWAY',
               groupValue: _selectedPaymentMethod,
               activeColor: AppColors.primaryGreen,
-              title: const Text('Mock / Sandbox Online Payment'),
+              title: const Text('Mock Online Payment (UPI / Card)'),
               subtitle: const Text('Instant card or UPI payment simulation'),
               onChanged: (val) => setState(() => _selectedPaymentMethod = val!),
             ),
             const SizedBox(height: 24),
             Card(
+              elevation: 2,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   children: [
-                    const Row(
+                    Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('Produce Items Subtotal:'),
-                        Text('₹155.00', style: TextStyle(fontWeight: FontWeight.bold)),
+                        const Text('Items Subtotal:'),
+                        Text('₹${cartState.subtotal.toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.bold)),
                       ],
                     ),
                     const SizedBox(height: 6),
-                    const Row(
+                    Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('Direct Farm Delivery Fee:'),
-                        Text('₹30.00', style: TextStyle(fontWeight: FontWeight.bold)),
+                        const Text('Delivery Fee:'),
+                        Text(
+                          cartState.deliveryFee == 0 ? 'FREE' : '₹${cartState.deliveryFee.toStringAsFixed(2)}',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: cartState.deliveryFee == 0 ? AppColors.success : null,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text('GST (5%):'),
+                        Text('₹${cartState.taxAmount.toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.bold)),
                       ],
                     ),
                     const Divider(height: 20),
-                    const Row(
+                    Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('Final Payable Total:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                        const Text('Final Payable Total:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                         Text(
-                          '₹185.00',
-                          style: TextStyle(
+                          '₹${cartState.totalAmount.toStringAsFixed(2)}',
+                          style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 18,
                             color: AppColors.primaryGreen,
@@ -138,7 +180,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             ),
             const SizedBox(height: 32),
             ElevatedButton(
-              onPressed: _placeOrder,
+              onPressed: cartState.items.isNotEmpty ? _placeOrder : null,
               child: const Text('Confirm & Place Direct Order'),
             ),
           ],

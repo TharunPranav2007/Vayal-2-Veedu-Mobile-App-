@@ -1,52 +1,35 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../app/providers/cart_provider.dart';
 
-class CartScreen extends StatefulWidget {
+class CartScreen extends ConsumerWidget {
   const CartScreen({super.key});
 
   @override
-  State<CartScreen> createState() => _CartScreenState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final cartState = ref.watch(cartProvider);
+    final cartItems = cartState.items.values.toList();
 
-class _CartScreenState extends State<CartScreen> {
-  final List<Map<String, dynamic>> _cartItems = [
-    {
-      'id': 'c1',
-      'name': 'Country Tomatoes',
-      'farmer': 'Green Field Organic Farm',
-      'price': 40.0,
-      'unit': 'kg',
-      'quantity': 2.0,
-    },
-    {
-      'id': 'c2',
-      'name': 'Organic Palak',
-      'farmer': 'Vayal Fresh Produce',
-      'price': 25.0,
-      'unit': 'bunch',
-      'quantity': 3.0,
-    },
-  ];
-
-  double get subtotal => _cartItems.fold(0, (sum, item) => sum + (item['price'] * item['quantity']));
-  double get deliveryFee => 30.0;
-  double get total => subtotal + deliveryFee;
-
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Shopping Cart'),
         actions: [
-          if (_cartItems.isNotEmpty)
+          if (cartItems.isNotEmpty)
             IconButton(
               icon: const Icon(Icons.delete_outline),
-              onPressed: () => setState(() => _cartItems.clear()),
+              tooltip: 'Clear Cart',
+              onPressed: () {
+                ref.read(cartProvider.notifier).clearCart();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Cart cleared')),
+                );
+              },
             ),
         ],
       ),
-      body: _cartItems.isEmpty
+      body: cartItems.isEmpty
           ? Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -57,9 +40,10 @@ class _CartScreenState extends State<CartScreen> {
                   const SizedBox(height: 8),
                   const Text('Add fresh produce directly from local farmers'),
                   const SizedBox(height: 24),
-                  ElevatedButton(
+                  ElevatedButton.icon(
                     onPressed: () => context.go('/consumer/home'),
-                    child: const Text('Browse Produce Catalog'),
+                    icon: const Icon(Icons.eco),
+                    label: const Text('Browse Produce Catalog'),
                   ),
                 ],
               ),
@@ -69,11 +53,14 @@ class _CartScreenState extends State<CartScreen> {
                 Expanded(
                   child: ListView.separated(
                     padding: const EdgeInsets.all(16),
-                    itemCount: _cartItems.length,
+                    itemCount: cartItems.length,
                     separatorBuilder: (_, __) => const SizedBox(height: 12),
                     itemBuilder: (context, index) {
-                      final item = _cartItems[index];
+                      final item = cartItems[index];
+                      final p = item.product;
+
                       return Card(
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                         child: Padding(
                           padding: const EdgeInsets.all(12),
                           child: Row(
@@ -83,9 +70,9 @@ class _CartScreenState extends State<CartScreen> {
                                 height: 60,
                                 decoration: BoxDecoration(
                                   color: AppColors.surfaceSubtleGreen,
-                                  borderRadius: BorderRadius.circular(8),
+                                  borderRadius: BorderRadius.circular(12),
                                 ),
-                                child: const Icon(Icons.eco, color: AppColors.primaryGreen),
+                                child: const Icon(Icons.eco_rounded, color: AppColors.primaryGreen, size: 32),
                               ),
                               const SizedBox(width: 12),
                               Expanded(
@@ -93,19 +80,20 @@ class _CartScreenState extends State<CartScreen> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      item['name'],
+                                      p.name,
                                       style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                                     ),
+                                    const SizedBox(height: 2),
                                     Text(
-                                      '₹${item['price']}/${item['unit']}  •  ${item['farmer']}',
+                                      '₹${p.price.toStringAsFixed(0)}/${p.unit} • ${p.farmerName}',
                                       style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
-                                      'Item Total: ₹${(item['price'] * item['quantity']).toStringAsFixed(2)}',
+                                      'Total: ₹${item.totalPrice.toStringAsFixed(2)}',
                                       style: const TextStyle(
                                         color: AppColors.primaryGreen,
-                                        fontWeight: FontWeight.w600,
+                                        fontWeight: FontWeight.bold,
                                         fontSize: 13,
                                       ),
                                     ),
@@ -115,27 +103,19 @@ class _CartScreenState extends State<CartScreen> {
                               Row(
                                 children: [
                                   IconButton(
-                                    icon: const Icon(Icons.remove_circle_outline, size: 20),
+                                    icon: const Icon(Icons.remove_circle_outline, size: 22, color: AppColors.primaryGreen),
                                     onPressed: () {
-                                      setState(() {
-                                        if (item['quantity'] > 1) {
-                                          item['quantity'] -= 1;
-                                        } else {
-                                          _cartItems.removeAt(index);
-                                        }
-                                      });
+                                      ref.read(cartProvider.notifier).updateQuantity(p.id, item.quantity - 1);
                                     },
                                   ),
                                   Text(
-                                    '${item['quantity'].toInt()}',
-                                    style: const TextStyle(fontWeight: FontWeight.bold),
+                                    '${item.quantity.toInt()}',
+                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                                   ),
                                   IconButton(
-                                    icon: const Icon(Icons.add_circle_outline, size: 20),
+                                    icon: const Icon(Icons.add_circle_outline, size: 22, color: AppColors.primaryGreen),
                                     onPressed: () {
-                                      setState(() {
-                                        item['quantity'] += 1;
-                                      });
+                                      ref.read(cartProvider.notifier).updateQuantity(p.id, item.quantity + 1);
                                     },
                                   ),
                                 ],
@@ -147,7 +127,7 @@ class _CartScreenState extends State<CartScreen> {
                     },
                   ),
                 ),
-                // Checkout Bottom Sheet
+                // Summary Panel
                 Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
@@ -159,6 +139,7 @@ class _CartScreenState extends State<CartScreen> {
                         offset: const Offset(0, -4),
                       ),
                     ],
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
                   ),
                   child: Column(
                     children: [
@@ -166,7 +147,7 @@ class _CartScreenState extends State<CartScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           const Text('Subtotal:'),
-                          Text('₹${subtotal.toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                          Text('₹${cartState.subtotal.toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.bold)),
                         ],
                       ),
                       const SizedBox(height: 6),
@@ -174,7 +155,21 @@ class _CartScreenState extends State<CartScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           const Text('Delivery Fee:'),
-                          Text('₹${deliveryFee.toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                          Text(
+                            cartState.deliveryFee == 0 ? 'FREE' : '₹${cartState.deliveryFee.toStringAsFixed(2)}',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: cartState.deliveryFee == 0 ? AppColors.success : null,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text('GST (5%):'),
+                          Text('₹${cartState.taxAmount.toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.bold)),
                         ],
                       ),
                       const Divider(height: 20),
@@ -183,7 +178,7 @@ class _CartScreenState extends State<CartScreen> {
                         children: [
                           const Text('Total Amount:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                           Text(
-                            '₹${total.toStringAsFixed(2)}',
+                            '₹${cartState.totalAmount.toStringAsFixed(2)}',
                             style: const TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
