@@ -1,13 +1,34 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { Role } from '@prisma/client';
+import { AuthenticatedUser } from '../common/decorators/current-user.decorator';
+
+export interface CreateProductDto {
+  name: string;
+  description: string;
+  categoryId: string;
+  price: number;
+  unit: string;
+  stock: number;
+}
+
+export interface UpdateProductDto {
+  name?: string;
+  description?: string;
+  categoryId?: string;
+  price?: number;
+  unit?: string;
+  stock?: number;
+  isPublished?: boolean;
+}
 
 @Injectable()
 export class ProductsService {
   constructor(private prisma: PrismaService) {}
 
   async findAll(query: { category?: string; search?: string; minPrice?: number; maxPrice?: number; page?: number; limit?: number }) {
-    const page = query.page || 1;
-    const limit = query.limit || 20;
+    const page = Number(query.page) || 1;
+    const limit = Number(query.limit) || 20;
     const skip = (page - 1) * limit;
 
     const where: any = {
@@ -29,8 +50,8 @@ export class ProductsService {
 
     if (query.minPrice || query.maxPrice) {
       where.price = {};
-      if (query.minPrice) where.price.gte = query.minPrice;
-      if (query.maxPrice) where.price.lte = query.maxPrice;
+      if (query.minPrice) where.price.gte = Number(query.minPrice);
+      if (query.maxPrice) where.price.lte = Number(query.maxPrice);
     }
 
     const [products, total] = await Promise.all([
@@ -39,8 +60,8 @@ export class ProductsService {
         skip,
         take: limit,
         include: {
-          farmer: { select: { farmName: true, farmAddress: true } },
-          category: { select: { name: true, slug: true } },
+          farmer: { select: { id: true, farmName: true, farmAddress: true, userId: true } },
+          category: { select: { id: true, name: true, slug: true } },
           images: true,
         },
         orderBy: { createdAt: 'desc' },
@@ -64,7 +85,7 @@ export class ProductsService {
     const product = await this.prisma.product.findUnique({
       where: { id },
       include: {
-        farmer: { select: { farmName: true, farmAddress: true, bio: true } },
+        farmer: { select: { id: true, farmName: true, farmAddress: true, bio: true, userId: true } },
         category: true,
         images: true,
         reviews: {
@@ -84,10 +105,22 @@ export class ProductsService {
     };
   }
 
-  async create(farmerProfileId: string, dto: { name: string; description: string; categoryId: string; price: number; unit: string; stock: number }) {
+  async create(user: AuthenticatedUser, dto: CreateProductDto) {
+    let farmerId = user.farmerProfileId;
+
+    if (!farmerId) {
+      const farmerProfile = await this.prisma.farmerProfile.findUnique({
+        where: { userId: user.id },
+      });
+      if (!farmerProfile) {
+        throw new ForbiddenException('User is not registered as a farmer.');
+      }
+      farmerId = farmerProfile.id;
+    }
+
     const product = await this.prisma.product.create({
       data: {
-        farmerId: farmerProfileId,
+        farmerId: farmerId,
         categoryId: dto.categoryId,
         name: dto.name,
         description: dto.description,
@@ -97,6 +130,7 @@ export class ProductsService {
       },
       include: {
         category: true,
+        farmer: { select: { id: true, farmName: true, userId: true } },
       },
     });
 
@@ -104,6 +138,68 @@ export class ProductsService {
       success: true,
       message: 'Product created successfully',
       data: product,
+    };
+  }
+
+  async update(id: string, user: AuthenticatedUser, dto: UpdateProductDto) {
+    const existing = await this.prisma.product.findUnique({
+      where: { id },
+      include: { farmer: { select: { userId: true } } },
+    });
+
+    if (!existing) {
+      throw new NotFoundException(`Product with ID ${id} not found.`);
+    }
+
+    // IDOR Enforcement: User must be the owner farmer or an Admin
+    if (user.role !== Role.ADMIN && existing.farmer.userId !== user.id) {
+      throw new ForbiddenException('You are not authorized to update this product.');
+    }
+
+    const updated = await this.prisma.product.update({
+      where: { id },
+      data: {
+        ...(dto.name !== undefined && { name: dto.name }),
+        ...(dto.description !== undefined && { description: dto.description }),
+        ...(dto.categoryId !== undefined && { categoryId: dto.categoryId }),
+        ...(dto.price !== undefined && { price: dto.price }),
+        ...(dto.unit !== undefined && { unit: dto.unit }),
+        ...(dto.stock !== undefined && { stock: dto.stock }),
+        ...(dto.isPublished !== undefined && { isPublished: dto.isPublished }),
+      },
+      include: {
+        category: true,
+        farmer: { select: { id: true, farmName: true, userId: true } },
+      },
+    });
+
+    return {
+      success: true,
+      message: 'Product updated successfully',
+      data: updated,
+    };
+  }
+
+  async remove(id: string, user: AuthenticatedUser) {
+    const existing = await this.prisma.product.findUnique({
+      where: { id },
+      include: { farmer: { select: { userId: true } } },
+    });
+
+    if (!existing) {
+      throw new NotFoundException(`Product with ID ${id} not found.`);
+    }
+
+    // IDOR Enforcement: User must be the owner farmer or an Admin
+    if (user.role !== Role.ADMIN && existing.farmer.userId !== user.id) {
+      throw new ForbiddenException('You are not authorized to delete this product.');
+    }
+
+    await this.prisma.product.delete({ where: { id } });
+
+    return {
+      success: true,
+      message: 'Product deleted successfully',
     };
   }
 }

@@ -113,6 +113,13 @@ final routerProvider = Provider<GoRouter>((ref) {
           return OrderTrackingScreen(orderId: orderId);
         },
       ),
+      GoRoute(
+        path: '/consumer/orders/track',
+        builder: (context, state) {
+          final orderId = state.uri.queryParameters['orderId'] ?? 'ORD-1001';
+          return OrderTrackingScreen(orderId: orderId);
+        },
+      ),
 
       // Delivery Partner Routes
       GoRoute(

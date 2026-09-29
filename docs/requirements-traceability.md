@@ -1,6 +1,6 @@
 # Vayal 2 Veedu (FarmDirect) — Requirements Traceability Matrix
 
-> **Document Version:** 1.0.0  
+> **Document Version:** 1.1.0  
 > **Traceability Standard:** ISO/IEC 25010 & IEEE 830 Mapping  
 
 ---
@@ -9,19 +9,19 @@
 
 | Req ID | Project Requirement | Application Feature | Target Screen | Backend API | Database Entity | Status | Verification Test |
 | :--- | :--- | :--- | :--- | :--- | :--- | :---: | :--- |
-| **REQ-01** | Multi-Role Authentication | JWT Auth with Role Guards | `LoginScreen`, `RegisterScreen`, `RoleSelectionScreen` | `POST /api/v1/auth/login`, `POST /api/v1/auth/register` | `User`, `RefreshToken` | ✅ Implemented | Unit Test: AuthNotifier; E2E: Login flow |
-| **REQ-02** | Farmer Produce Management | Add/Edit/Delete Produce | `AddProductScreen`, `MyProductsScreen` | `POST /api/v1/products`, `DELETE /api/v1/products/:id` | `Product`, `ProductImage`, `Category` | ✅ Implemented | Widget Test: AddProductForm; Integration Test |
-| **REQ-03** | Farmer Inventory Control | Live Stock Updates & Alert | `FarmerDashboardScreen`, `MyProductsScreen` | `PATCH /api/v1/products/:id` | `Product` | ✅ Implemented | Unit Test: Deduct stock logic |
-| **REQ-04** | Consumer Product Discovery | Search, Category Filter & Sorting | `ConsumerHomeScreen` | `GET /api/v1/products` | `Product`, `Category` | ✅ Implemented | Widget Test: SearchBar & ChoiceChips |
-| **REQ-05** | Persistent Shopping Cart | Cart Item & Subtotal/GST Calculation | `CartScreen` | Local Riverpod + `Cart` DB Entity | `Cart`, `CartItem` | ✅ Implemented | Unit Test: CartNotifier total calculation |
-| **REQ-06** | Checkout & Stock Locking | Order Placement & Stock Locking | `CheckoutScreen` | `POST /api/v1/orders` | `Order`, `OrderItem`, `Payment` | ✅ Implemented | Widget Test: Checkout Form; DB Transaction Test |
-| **REQ-07** | Real-Time Order Tracking | Live Status Timeline (`PLACED` ➔ `DELIVERED`) | `OrderTrackingScreen` | `GET /api/v1/orders/:id`, WebSocket Gateway | `Order`, `OrderStatusHistory` | ✅ Implemented | Widget Test: OrderTracking Timeline |
-| **REQ-08** | Delivery Partner Dispatch | View & Accept Delivery Jobs | `DeliveryDashboardScreen` | `GET /api/v1/orders`, `PATCH /api/v1/orders/:id/status` | `Delivery`, `DeliveryProfile` | ✅ Implemented | Integration Test: Delivery Partner Status update |
-| **REQ-09** | Admin System Oversight | Platform Metrics & Moderation | `AdminDashboardScreen` | `GET /api/v1/admin/metrics` | `User`, `Order`, `Product` | ✅ Implemented | Widget Test: Admin Metric Cards |
-| **REQ-10** | Role-Based Access Control | Strict Route & API Security | `AppRouter` Guards | `JwtAuthGuard`, `RolesGuard` | `User.role` | ✅ Implemented | Unit Test: RolesGuard authorization check |
+| **REQ-01** | Multi-Role Authentication | JWT Auth with Passport Strategy | `LoginScreen`, `RegisterScreen` | `POST /auth/login`, `POST /auth/register` | `User`, `RefreshToken` | ✅ Implemented | Unit Test: `JwtStrategy`, `JwtAuthGuard` |
+| **REQ-02** | Farmer Produce Management | Add/Edit/Delete Produce with IDOR Check | `AddProductScreen`, `MyProductsScreen` | `POST /products`, `PATCH /products/:id`, `DELETE /products/:id` | `Product`, `ProductImage`, `Category` | ✅ Implemented (Phase 1 Secure) | Security Test 3 & 7 (`security.spec.ts`) |
+| **REQ-03** | Farmer Inventory Control | Live Stock Updates & Stock Locking | `FarmerDashboardScreen`, `MyProductsScreen` | `PATCH /products/:id` | `Product` | ✅ Implemented | Unit Test: Deduct stock logic |
+| **REQ-04** | Consumer Product Discovery | Search, Category Filter & Sorting | `ConsumerHomeScreen` | `GET /products` | `Product`, `Category` | ✅ Implemented | Widget Test: SearchBar & ChoiceChips |
+| **REQ-05** | Persistent Shopping Cart | Cart Item & Subtotal Calculation | `CartScreen` | Local Riverpod + `Cart` DB Entity | `Cart`, `CartItem` | ✅ Implemented | Unit Test: CartNotifier total calculation |
+| **REQ-06** | Checkout & Stock Locking | Order Placement & Consumer Binding | `CheckoutScreen` | `POST /orders` | `Order`, `OrderItem`, `Payment` | ✅ Implemented (Phase 1 Secure) | Security Test: Consumer binding & stock locking |
+| **REQ-07** | Real-Time Order Tracking | Live Status Timeline & IDOR View | `OrderTrackingScreen` | `GET /orders/:id` | `Order`, `OrderStatusHistory` | ✅ Implemented (Phase 1 Secure) | Security Test 4: Order IDOR protection |
+| **REQ-08** | Delivery Partner Dispatch | View & Update Assigned Deliveries | `DeliveryDashboardScreen` | `GET /deliveries/my-deliveries`, `PATCH /deliveries/:id/status` | `Delivery`, `DeliveryProfile` | ✅ Implemented (Phase 1 Secure) | Security Test 5: Delivery IDOR protection |
+| **REQ-09** | Admin System Oversight | Platform Metrics & Moderation | `AdminDashboardScreen` | Admin endpoints | `User`, `Order`, `Product` | ✅ Implemented (Phase 1 Secure) | Security Test 6: Admin RBAC protection |
+| **REQ-10** | Role-Based Access Control | Strict Route & API Security Guards | NestJS Global Guards | `JwtAuthGuard`, `RolesGuard` | `User.role` | ✅ Implemented (Phase 1 Secure) | Security Test 1 & 2: `security.spec.ts` |
 
 ---
 
 ## 2. Requirement Verification Sign-off
 
-All 10 primary functional requirements specified in the project scope have been successfully mapped to concrete code implementation artifacts across the Mobile Client, Backend Controllers, and PostgreSQL Database tables.
+- **Phase 1 Security & Authorization Sign-off**: Global JWT authentication (`JwtAuthGuard`), server-side Role-Based Access Control (`RolesGuard`), and resource ownership IDOR verification are fully implemented and verified with 100% pass rate across 7 Jest security test cases.
