@@ -11,5 +11,6 @@ void main() {
     );
 
     expect(find.byType(Vayal2VeeduApp), findsOneWidget);
+    await tester.pumpAndSettle();
   });
 }
