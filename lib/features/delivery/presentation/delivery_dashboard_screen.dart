@@ -63,9 +63,13 @@ class DeliveryDashboardScreen extends ConsumerWidget {
                               ),
                             ),
                             const SizedBox(width: 6),
-                            Text(
-                              'Online • $completedDeliveries Delivered Today',
-                              style: const TextStyle(color: AppColors.info, fontSize: 13, fontWeight: FontWeight.w600),
+                            Expanded(
+                              child: Text(
+                                'Online • $completedDeliveries Delivered Today',
+                                style: const TextStyle(color: AppColors.info, fontSize: 13, fontWeight: FontWeight.w600),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
                           ],
                         ),

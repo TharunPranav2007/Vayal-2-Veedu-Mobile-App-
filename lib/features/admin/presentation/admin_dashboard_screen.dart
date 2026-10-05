@@ -63,9 +63,13 @@ class AdminDashboardScreen extends ConsumerWidget {
                         ),
                       ),
                       const SizedBox(width: 6),
-                      const Text(
-                        'Services Operational: NestJS REST API, PostgreSQL, WebSocket',
-                        style: TextStyle(color: AppColors.accentGreen, fontSize: 12),
+                      const Expanded(
+                        child: Text(
+                          'Services Operational: NestJS REST API, PostgreSQL, WebSocket',
+                          style: TextStyle(color: AppColors.accentGreen, fontSize: 12),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
                     ],
                   ),
@@ -171,8 +175,8 @@ class _AdminCard extends StatelessWidget {
           children: [
             Icon(icon, color: color, size: 24),
             const Spacer(),
-            Text(value, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-            Text(title, style: const TextStyle(color: AppColors.textMuted, fontSize: 12)),
+            Text(value, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold), maxLines: 1, overflow: TextOverflow.ellipsis),
+            Text(title, style: const TextStyle(color: AppColors.textMuted, fontSize: 12), maxLines: 1, overflow: TextOverflow.ellipsis),
           ],
         ),
       ),
