@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/app_standard_header.dart';
 import '../../../app/providers/products_provider.dart';
 import '../../../app/providers/cart_provider.dart';
 
@@ -32,75 +33,8 @@ class _ConsumerHomeScreenState extends ConsumerState<ConsumerHomeScreen> {
     }).toList();
 
     return Scaffold(
-      appBar: AppBar(
-        title: Row(
-          children: [
-            Container(
-              width: 34,
-              height: 34,
-              decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-                image: DecorationImage(
-                  image: AssetImage('assets/images/app_logo_icon.png'),
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-            const SizedBox(width: 10),
-            Text(
-              'Vayal 2 Veedu',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-          ],
-        ),
-        actions: [
-          Stack(
-            alignment: Alignment.center,
-            children: [
-              IconButton(
-                icon: const Icon(Icons.shopping_cart_outlined, size: 26),
-                onPressed: () => context.push('/consumer/cart'),
-              ),
-              if (cartState.itemCount > 0)
-                Positioned(
-                  right: 6,
-                  top: 6,
-                  child: Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: const BoxDecoration(
-                      color: AppColors.secondaryOrange,
-                      shape: BoxShape.circle,
-                    ),
-                    constraints: const BoxConstraints(
-                      minWidth: 18,
-                      minHeight: 18,
-                    ),
-                    child: Text(
-                      '${cartState.itemCount}',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ),
-            ],
-          ),
-          IconButton(
-            icon: const Icon(Icons.local_shipping_outlined, size: 24),
-            tooltip: 'Track Active Orders',
-            onPressed: () => context.push('/consumer/orders/track'),
-          ),
-          IconButton(
-            icon: const Icon(Icons.account_circle_outlined, size: 26),
-            onPressed: () => context.push('/profile'),
-          ),
-        ],
+      appBar: const AppStandardHeader(
+        subtitle: 'Consumer Direct Marketplace',
       ),
       body: CustomScrollView(
         slivers: [

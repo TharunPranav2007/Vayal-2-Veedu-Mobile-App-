@@ -24,6 +24,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     super.initState();
     // Preset demo login based on selected role for easy evaluation
     String emailText;
+    String passwordText = 'Password123!';
     switch (widget.role) {
       case UserRole.FARMER:
         emailText = 'farmer@vayal2veedu.com';
@@ -35,11 +36,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         emailText = 'delivery@vayal2veedu.com';
         break;
       case UserRole.ADMIN:
-        emailText = 'admin@vayal2veedu.com';
+        emailText = 'tharunpranavt@vayal2veedu.com';
+        passwordText = 'TPadmin@V2V';
         break;
     }
     _emailController = TextEditingController(text: emailText);
-    _passwordController = TextEditingController(text: 'Password123!');
+    _passwordController = TextEditingController(text: passwordText);
   }
 
   @override
@@ -192,24 +194,46 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       : Text('Sign In as ${userRoleToString(widget.role).replaceAll('_', ' ')}'),
                 ),
                 const SizedBox(height: 24),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text("Don't have an account? "),
-                    GestureDetector(
-                      onTap: () {
-                        context.push('/register?role=${userRoleToString(widget.role)}');
-                      },
-                      child: const Text(
-                        'Register Now',
-                        style: TextStyle(
-                          color: AppColors.primaryGreen,
-                          fontWeight: FontWeight.bold,
+                if (widget.role != UserRole.ADMIN)
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text("Don't have an account? "),
+                      GestureDetector(
+                        onTap: () {
+                          context.push('/register?role=${userRoleToString(widget.role)}');
+                        },
+                        child: const Text(
+                          'Register Now',
+                          style: TextStyle(
+                            color: AppColors.primaryGreen,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
+                    ],
+                  )
+                else
+                  Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryGreen.withOpacity(0.08),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: AppColors.primaryGreen.withOpacity(0.2)),
                     ),
-                  ],
-                ),
+                    child: const Row(
+                      children: [
+                        Icon(Icons.shield_outlined, color: AppColors.primaryGreen, size: 20),
+                        SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            'Platform Administrator credentials are strictly restricted. Additional admin accounts can only be provisioned by a logged-in Administrator.',
+                            style: TextStyle(fontSize: 12, color: AppColors.textDark, height: 1.3),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
               ],
             ),
           ),

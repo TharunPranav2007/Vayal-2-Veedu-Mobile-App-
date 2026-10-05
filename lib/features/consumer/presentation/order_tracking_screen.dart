@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/widgets/app_standard_header.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../app/providers/orders_provider.dart';
 import '../../orders/domain/order_model.dart';
@@ -97,14 +98,9 @@ class _OrderTrackingScreenState extends ConsumerState<OrderTrackingScreen> {
     ];
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('My Orders & Tracking'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () => setState(() {}),
-          ),
-        ],
+      appBar: const AppStandardHeader(
+        subtitle: 'Order Tracking & History',
+        showBackButton: true,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -210,60 +206,100 @@ class _OrderTrackingScreenState extends ConsumerState<OrderTrackingScreen> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [AppColors.primaryDarkGreen, AppColors.primaryGreen],
+                gradient: LinearGradient(
+                  colors: selectedOrder.status == OrderStatus.CANCELLED
+                      ? [AppColors.error, Colors.red.shade700]
+                      : [AppColors.primaryDarkGreen, AppColors.primaryGreen],
                 ),
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.primaryGreen.withOpacity(0.2),
+                    color: (selectedOrder.status == OrderStatus.CANCELLED ? AppColors.error : AppColors.primaryGreen).withOpacity(0.2),
                     blurRadius: 8,
                     offset: const Offset(0, 4),
                   ),
                 ],
               ),
-              child: Row(
+              child: Column(
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(Icons.local_shipping_outlined, color: Colors.white, size: 28),
-                  ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Order #${selectedOrder.orderNumber}',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                            fontSize: 18,
-                          ),
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          shape: BoxShape.circle,
                         ),
-                        const SizedBox(height: 3),
-                        Text(
-                          'Status: ${selectedOrder.status.name.replaceAll('_', ' ')}',
-                          style: const TextStyle(color: AppColors.accentGreen, fontSize: 13, fontWeight: FontWeight.w600),
+                        child: Icon(
+                          selectedOrder.status == OrderStatus.CANCELLED ? Icons.cancel : Icons.local_shipping_outlined,
+                          color: Colors.white,
+                          size: 28,
                         ),
-                      ],
-                    ),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Order #${selectedOrder.orderNumber}',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                                fontSize: 18,
+                              ),
+                            ),
+                            const SizedBox(height: 3),
+                            Text(
+                              'Status: ${selectedOrder.status.name.replaceAll('_', ' ')}',
+                              style: const TextStyle(color: AppColors.accentGreen, fontSize: 13, fontWeight: FontWeight.w600),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: AppColors.secondaryOrange,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          '₹${selectedOrder.totalAmount.toStringAsFixed(0)}',
+                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+                        ),
+                      ),
+                    ],
                   ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: AppColors.secondaryOrange,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      '₹${selectedOrder.totalAmount.toStringAsFixed(0)}',
-                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
-                    ),
+                  const Divider(color: Colors.white30, height: 20),
+                  Row(
+                    children: [
+                      const Icon(Icons.agriculture, color: Colors.white, size: 18),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'Farm Origin: ${selectedOrder.farmName ?? "Green Field Organic Farm"} (${selectedOrder.farmerName ?? "M. Ramanathan"})',
+                          style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w500),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
                   ),
+                  if (selectedOrder.status == OrderStatus.CANCELLED) ...[
+                    const SizedBox(height: 8),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        'Reason for Cancellation: ${selectedOrder.cancellationReason ?? "Produce unavailable / harvest delay"}',
+                        style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),

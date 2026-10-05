@@ -181,7 +181,7 @@ class OrdersNotifier extends StateNotifier<List<OrderModel>> {
     ref.read(cartProvider.notifier).clearCart();
   }
 
-  void updateOrderStatus(String orderId, OrderStatus newStatus) {
+  void updateOrderStatus(String orderId, OrderStatus newStatus, {String? reason}) {
     state = [
       for (final ord in state)
         if (ord.id == orderId)
@@ -190,6 +190,10 @@ class OrdersNotifier extends StateNotifier<List<OrderModel>> {
             orderNumber: ord.orderNumber,
             consumerId: ord.consumerId,
             farmerId: ord.farmerId,
+            farmName: ord.farmName,
+            farmerName: ord.farmerName,
+            farmerPhone: ord.farmerPhone,
+            cancellationReason: reason ?? ord.cancellationReason,
             subtotal: ord.subtotal,
             deliveryFee: ord.deliveryFee,
             discount: ord.discount,
@@ -201,6 +205,10 @@ class OrdersNotifier extends StateNotifier<List<OrderModel>> {
         else
           ord,
     ];
+  }
+
+  void cancelOrder(String orderId, String reason) {
+    updateOrderStatus(orderId, OrderStatus.CANCELLED, reason: reason);
   }
 }
 

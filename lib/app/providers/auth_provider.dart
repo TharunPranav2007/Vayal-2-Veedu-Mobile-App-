@@ -95,6 +95,21 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
   }
 
+  void updateUserProfile({required String name, required String phone, required String email}) {
+    if (state.user != null) {
+      final updated = User(
+        id: state.user!.id,
+        email: email,
+        phone: phone,
+        name: name,
+        role: state.user!.role,
+        profileImageUrl: state.user!.profileImageUrl,
+        isActive: state.user!.isActive,
+      );
+      state = state.copyWith(user: updated);
+    }
+  }
+
   Future<bool> register(String name, String email, String phone, String password, UserRole role) async {
     state = state.copyWith(isLoading: true, errorMessage: null);
     try {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/widgets/app_standard_header.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../app/providers/products_provider.dart';
 import '../../../app/providers/orders_provider.dart';
@@ -200,15 +201,10 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
     }).toList();
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Platform Administrator'),
-        backgroundColor: AppColors.primaryDarkGreen,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.account_circle),
-            onPressed: () => context.push('/profile'),
-          ),
-        ],
+      appBar: const AppStandardHeader(
+        subtitle: 'Platform Administrator',
+        showCart: false,
+        showOrders: false,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),

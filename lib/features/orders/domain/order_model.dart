@@ -66,6 +66,10 @@ class OrderModel {
   final String orderNumber;
   final String consumerId;
   final String farmerId;
+  final String farmName;
+  final String farmerName;
+  final String farmerPhone;
+  final String? cancellationReason;
   final double subtotal;
   final double deliveryFee;
   final double discount;
@@ -79,6 +83,10 @@ class OrderModel {
     required this.orderNumber,
     required this.consumerId,
     required this.farmerId,
+    this.farmName = 'Green Field Organic Farm, Madurai',
+    this.farmerName = 'M. Ramanathan (Organic Farmer)',
+    this.farmerPhone = '+91 98421 54321',
+    this.cancellationReason,
     required this.subtotal,
     required this.deliveryFee,
     required this.discount,
@@ -94,6 +102,10 @@ class OrderModel {
       orderNumber: json['orderNumber'] as String? ?? 'ORD-0000',
       consumerId: json['consumerId'] as String? ?? '',
       farmerId: json['farmerId'] as String? ?? '',
+      farmName: json['farmName'] as String? ?? 'Green Field Organic Farm, Madurai',
+      farmerName: json['farmerName'] as String? ?? 'M. Ramanathan (Organic Farmer)',
+      farmerPhone: json['farmerPhone'] as String? ?? '+91 98421 54321',
+      cancellationReason: json['cancellationReason'] as String?,
       subtotal: (json['subtotal'] is String) ? double.parse(json['subtotal']) : (json['subtotal'] as num).toDouble(),
       deliveryFee: (json['deliveryFee'] is String) ? double.parse(json['deliveryFee']) : (json['deliveryFee'] as num).toDouble(),
       discount: (json['discount'] is String) ? double.parse(json['discount']) : (json['discount'] as num).toDouble(),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/widgets/app_standard_header.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../app/providers/auth_provider.dart';
 import '../../../app/providers/orders_provider.dart';
@@ -250,14 +251,10 @@ class DeliveryDashboardScreen extends ConsumerWidget {
     final completedDeliveries = orders.where((o) => o.status == OrderStatus.DELIVERED).length;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Delivery Partner Portal'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.account_circle),
-            onPressed: () => context.push('/profile'),
-          ),
-        ],
+      appBar: const AppStandardHeader(
+        subtitle: 'Delivery Fleet Portal',
+        showCart: false,
+        showOrders: false,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),

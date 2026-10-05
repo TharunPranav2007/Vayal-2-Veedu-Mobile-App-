@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/widgets/app_standard_header.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../app/providers/auth_provider.dart';
 import '../../../app/providers/products_provider.dart';
@@ -16,6 +17,74 @@ class FarmerDashboardScreen extends ConsumerStatefulWidget {
 
 class _FarmerDashboardScreenState extends ConsumerState<FarmerDashboardScreen> {
   String _selectedFilter = 'Active';
+
+  void _showRejectOrderDialog(BuildContext context, OrderModel ord) {
+    String selectedReason = 'Harvest Shortfall / Out of Stock';
+    final customReasonCtrl = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (dialogCtx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: Row(
+            children: [
+              const Icon(Icons.cancel_outlined, color: AppColors.error),
+              const SizedBox(width: 8),
+              Text('Reject Order #${ord.orderNumber}', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('Please select or specify the reason for rejecting this order:', style: TextStyle(fontSize: 13, color: AppColors.textMuted)),
+              const SizedBox(height: 12),
+              ...[
+                'Harvest Shortfall / Out of Stock',
+                'Adverse Weather Damage',
+                'Transport / Logistics Unavailable',
+                'Custom Reason',
+              ].map(
+                (reason) => RadioListTile<String>(
+                  title: Text(reason, style: const TextStyle(fontSize: 13)),
+                  value: reason,
+                  groupValue: selectedReason,
+                  dense: true,
+                  activeColor: AppColors.error,
+                  onChanged: (val) {
+                    if (val != null) setDialogState(() => selectedReason = val);
+                  },
+                ),
+              ),
+              if (selectedReason == 'Custom Reason') ...[
+                const SizedBox(height: 8),
+                TextFormField(
+                  controller: customReasonCtrl,
+                  decoration: const InputDecoration(hintText: 'Enter cancellation reason...', isDense: true),
+                ),
+              ],
+            ],
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(dialogCtx), child: const Text('Back')),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
+              onPressed: () {
+                final finalReason = selectedReason == 'Custom Reason' ? customReasonCtrl.text.trim() : selectedReason;
+                ref.read(ordersProvider.notifier).cancelOrder(ord.id, finalReason.isEmpty ? 'Cancelled by Farmer' : finalReason);
+                Navigator.pop(dialogCtx);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Order #${ord.orderNumber} rejected.')),
+                );
+              },
+              child: const Text('Confirm Rejection'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   void _showOrderInspectionModal(BuildContext context, OrderModel ord) {
     showModalBottomSheet(
@@ -116,14 +185,10 @@ class _FarmerDashboardScreenState extends ConsumerState<FarmerDashboardScreen> {
         .fold(0.0, (sum, o) => sum + o.totalAmount);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Farmer Dashboard'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.account_circle),
-            onPressed: () => context.push('/profile'),
-          ),
-        ],
+      appBar: const AppStandardHeader(
+        subtitle: 'Farmer Direct Portal',
+        showCart: false,
+        showOrders: false,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -341,15 +406,34 @@ class _FarmerDashboardScreenState extends ConsumerState<FarmerDashboardScreen> {
 
                                 // Sequential Farmer Lifecycle Action Pipeline
                                 if (ord.status == OrderStatus.PLACED)
-                                  ElevatedButton.icon(
-                                    onPressed: () {
-                                      ref.read(ordersProvider.notifier).updateOrderStatus(ord.id, OrderStatus.CONFIRMED);
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(content: Text('Order #${ord.orderNumber} accepted!')),
-                                      );
-                                    },
-                                    icon: const Icon(Icons.check_circle_outline, size: 18),
-                                    label: const Text('1. Accept Order'),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: ElevatedButton.icon(
+                                          style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryGreen),
+                                          onPressed: () {
+                                            ref.read(ordersProvider.notifier).updateOrderStatus(ord.id, OrderStatus.CONFIRMED);
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              SnackBar(content: Text('Order #${ord.orderNumber} accepted!')),
+                                            );
+                                          },
+                                          icon: const Icon(Icons.check_circle_outline, size: 16),
+                                          label: const Text('Accept Order', style: TextStyle(fontSize: 12)),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: OutlinedButton.icon(
+                                          style: OutlinedButton.styleFrom(
+                                            foregroundColor: AppColors.error,
+                                            side: const BorderSide(color: AppColors.error),
+                                          ),
+                                          onPressed: () => _showRejectOrderDialog(context, ord),
+                                          icon: const Icon(Icons.cancel_outlined, size: 16),
+                                          label: const Text('Reject Order', style: TextStyle(fontSize: 12)),
+                                        ),
+                                      ),
+                                    ],
                                   )
                                 else if (ord.status == OrderStatus.CONFIRMED)
                                   ElevatedButton.icon(
@@ -374,6 +458,28 @@ class _FarmerDashboardScreenState extends ConsumerState<FarmerDashboardScreen> {
                                     },
                                     icon: const Icon(Icons.local_shipping, size: 18),
                                     label: const Text('3. Mark Prepared & Ready for Pickup'),
+                                  )
+                                else if (ord.status == OrderStatus.CANCELLED)
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.error.withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        const Icon(Icons.cancel, color: AppColors.error, size: 16),
+                                        const SizedBox(width: 6),
+                                        Expanded(
+                                          child: Text(
+                                            'Order Rejected/Cancelled: ${ord.cancellationReason ?? "No reason specified"}',
+                                            style: const TextStyle(color: AppColors.error, fontWeight: FontWeight.bold, fontSize: 12),
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   )
                                 else
                                   Container(

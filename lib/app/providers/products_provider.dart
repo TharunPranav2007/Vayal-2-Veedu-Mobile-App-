@@ -52,7 +52,7 @@ class ProductsNotifier extends StateNotifier<List<Product>> {
             averageRating: 4.7,
             totalReviews: 18,
             imageUrls: [
-              'https://images.unsplash.com/photo-1598170845058-12ef4a457939?w=600&auto=format&fit=crop&q=80',
+              'https://images.unsplash.com/photo-1447175008436-08417104e47e?w=600&auto=format&fit=crop&q=80',
             ],
           ),
           Product(
