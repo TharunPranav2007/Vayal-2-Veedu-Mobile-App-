@@ -93,7 +93,27 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 12),
+                Center(
+                  child: Container(
+                    width: 110,
+                    height: 110,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.primaryGreen.withOpacity(0.2),
+                          blurRadius: 12,
+                          spreadRadius: 2,
+                        ),
+                      ],
+                      image: const DecorationImage(
+                        image: AssetImage('assets/images/app_logo_icon.png'),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
                 Text(
                   'Sign In to Vayal 2 Veedu',
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(

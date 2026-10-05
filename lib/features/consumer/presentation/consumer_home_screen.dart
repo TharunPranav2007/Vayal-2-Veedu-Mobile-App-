@@ -35,8 +35,18 @@ class _ConsumerHomeScreenState extends ConsumerState<ConsumerHomeScreen> {
       appBar: AppBar(
         title: Row(
           children: [
-            const Icon(Icons.agriculture_rounded, color: Colors.white, size: 28),
-            const SizedBox(width: 8),
+            Container(
+              width: 34,
+              height: 34,
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                image: DecorationImage(
+                  image: AssetImage('assets/images/app_logo_icon.png'),
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
             Text(
               'Vayal 2 Veedu',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
