@@ -50,14 +50,20 @@ class MyProductsScreen extends ConsumerWidget {
                     padding: const EdgeInsets.all(16),
                     child: Row(
                       children: [
-                        Container(
-                          width: 65,
-                          height: 65,
-                          decoration: BoxDecoration(
-                            color: AppColors.surfaceSubtleGreen,
-                            borderRadius: BorderRadius.circular(12),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: SizedBox(
+                            width: 65,
+                            height: 65,
+                            child: Image.network(
+                              product.imageUrls.isNotEmpty ? product.imageUrls.first : '',
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) => Container(
+                                color: AppColors.surfaceSubtleGreen,
+                                child: const Icon(Icons.eco, color: AppColors.primaryGreen, size: 36),
+                              ),
+                            ),
                           ),
-                          child: const Icon(Icons.eco, color: AppColors.primaryGreen, size: 36),
                         ),
                         const SizedBox(width: 14),
                         Expanded(

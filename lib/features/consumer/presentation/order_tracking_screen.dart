@@ -5,10 +5,23 @@ import '../../../core/theme/app_theme.dart';
 import '../../../app/providers/orders_provider.dart';
 import '../../orders/domain/order_model.dart';
 
-class OrderTrackingScreen extends ConsumerWidget {
+class OrderTrackingScreen extends ConsumerStatefulWidget {
   final String orderId;
 
   const OrderTrackingScreen({super.key, required this.orderId});
+
+  @override
+  ConsumerState<OrderTrackingScreen> createState() => _OrderTrackingScreenState();
+}
+
+class _OrderTrackingScreenState extends ConsumerState<OrderTrackingScreen> {
+  String? _selectedOrderId;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedOrderId = widget.orderId;
+  }
 
   int _getStatusIndex(OrderStatus status) {
     switch (status) {
@@ -29,31 +42,55 @@ class OrderTrackingScreen extends ConsumerWidget {
     }
   }
 
+  Color _getStatusColor(OrderStatus status) {
+    switch (status) {
+      case OrderStatus.DELIVERED:
+        return AppColors.success;
+      case OrderStatus.OUT_FOR_DELIVERY:
+      case OrderStatus.PICKED_UP:
+        return AppColors.secondaryOrange;
+      case OrderStatus.CONFIRMED:
+      case OrderStatus.PREPARING:
+      case OrderStatus.READY_FOR_PICKUP:
+        return AppColors.info;
+      case OrderStatus.CANCELLED:
+        return AppColors.error;
+      default:
+        return AppColors.primaryGreen;
+    }
+  }
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final orders = ref.watch(ordersProvider);
-    final order = orders.firstWhere(
-      (o) => o.id == orderId || o.orderNumber == orderId,
-      orElse: () => orders.isNotEmpty ? orders.first : OrderModel(
-        id: 'ord-101',
-        orderNumber: 'ORD-8821',
-        consumerId: 'cons-1',
-        farmerId: 'f1',
-        subtotal: 100.0,
-        deliveryFee: 30.0,
-        discount: 0.0,
-        totalAmount: 135.0,
-        status: OrderStatus.CONFIRMED,
-        createdAt: DateTime.now(),
-        items: [],
-      ),
+  Widget build(BuildContext context) {
+    final allOrders = ref.watch(ordersProvider);
+    // Filter orders for current consumer profile (cons-1) or show all placed orders
+    final consumerOrders = allOrders.where((o) => o.consumerId == 'cons-1' || true).toList();
+
+    // Determine current active order
+    final selectedOrder = consumerOrders.firstWhere(
+      (o) => o.id == _selectedOrderId || o.orderNumber == _selectedOrderId,
+      orElse: () => consumerOrders.isNotEmpty
+          ? consumerOrders.first
+          : OrderModel(
+              id: 'ord-101',
+              orderNumber: 'ORD-8821',
+              consumerId: 'cons-1',
+              farmerId: 'f1',
+              subtotal: 100.0,
+              deliveryFee: 30.0,
+              discount: 0.0,
+              totalAmount: 135.0,
+              status: OrderStatus.CONFIRMED,
+              createdAt: DateTime.now(),
+              items: [],
+            ),
     );
 
-    final currentIdx = _getStatusIndex(order.status);
+    final currentIdx = _getStatusIndex(selectedOrder.status);
 
     final statusSteps = [
       {'title': 'Order Placed', 'subtitle': 'Sent to organic farm'},
-      {'title': 'Confirmed & Harvested', 'subtitle': 'Farmer packing fresh produce'},
+      {'title': 'Confirmed & Packaged', 'subtitle': 'Farmer packing fresh produce'},
       {'title': 'Picked Up by Delivery', 'subtitle': 'Partner arrived at local farm'},
       {'title': 'Out for Delivery', 'subtitle': 'On the way to your doorstep'},
       {'title': 'Delivered', 'subtitle': 'Enjoy your direct farm produce!'},
@@ -61,32 +98,139 @@ class OrderTrackingScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Track Order #${order.orderNumber}'),
+        title: const Text('My Orders & Tracking'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: () => setState(() {}),
+          ),
+        ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Status Card
+            // Order Selector Header
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'My Placed Orders (${consumerOrders.length})',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                ),
+                Text(
+                  'Tap to track',
+                  style: TextStyle(color: AppColors.primaryGreen, fontSize: 12, fontWeight: FontWeight.w600),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+
+            // Horizontal Order Cards List
+            SizedBox(
+              height: 95,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: consumerOrders.length,
+                itemBuilder: (context, index) {
+                  final ord = consumerOrders[index];
+                  final isSelected = ord.id == selectedOrder.id;
+
+                  return GestureDetector(
+                    onTap: () => setState(() => _selectedOrderId = ord.id),
+                    child: Container(
+                      width: 170,
+                      margin: const EdgeInsets.only(right: 12),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: isSelected ? AppColors.surfaceSubtleGreen : Colors.white,
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                          color: isSelected ? AppColors.primaryGreen : Colors.grey.shade300,
+                          width: isSelected ? 2 : 1,
+                        ),
+                        boxShadow: [
+                          if (isSelected)
+                            BoxShadow(
+                              color: AppColors.primaryGreen.withOpacity(0.15),
+                              blurRadius: 6,
+                              offset: const Offset(0, 2),
+                            ),
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                ord.orderNumber,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                  color: isSelected ? AppColors.primaryDarkGreen : AppColors.textDark,
+                                ),
+                              ),
+                              if (isSelected)
+                                const Icon(Icons.check_circle, color: AppColors.primaryGreen, size: 16),
+                            ],
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: _getStatusColor(ord.status).withOpacity(0.15),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              ord.status.name.replaceAll('_', ' '),
+                              style: TextStyle(
+                                color: _getStatusColor(ord.status),
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          Text(
+                            '₹${ord.totalAmount.toStringAsFixed(2)} • ${ord.items.length} item(s)',
+                            style: const TextStyle(color: AppColors.textMuted, fontSize: 11),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            // Active Selected Order Summary Banner
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [AppColors.surfaceSubtleGreen, Colors.white],
+                  colors: [AppColors.primaryDarkGreen, AppColors.primaryGreen],
                 ),
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: AppColors.primaryGreen.withOpacity(0.3)),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.primaryGreen.withOpacity(0.2),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
               child: Row(
                 children: [
                   Container(
                     padding: const EdgeInsets.all(10),
-                    decoration: const BoxDecoration(
-                      color: AppColors.primaryGreen,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.local_shipping, color: Colors.white, size: 28),
+                    child: const Icon(Icons.local_shipping_outlined, color: Colors.white, size: 28),
                   ),
                   const SizedBox(width: 14),
                   Expanded(
@@ -94,19 +238,30 @@ class OrderTrackingScreen extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Status: ${order.status.name.replaceAll('_', ' ')}',
+                          'Order #${selectedOrder.orderNumber}',
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
-                            color: AppColors.primaryGreen,
-                            fontSize: 16,
+                            color: Colors.white,
+                            fontSize: 18,
                           ),
                         ),
                         const SizedBox(height: 3),
                         Text(
-                          'Total Payable: ₹${order.totalAmount.toStringAsFixed(2)}',
-                          style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
+                          'Status: ${selectedOrder.status.name.replaceAll('_', ' ')}',
+                          style: const TextStyle(color: AppColors.accentGreen, fontSize: 13, fontWeight: FontWeight.w600),
                         ),
                       ],
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: AppColors.secondaryOrange,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      '₹${selectedOrder.totalAmount.toStringAsFixed(0)}',
+                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
                     ),
                   ),
                 ],
@@ -115,12 +270,12 @@ class OrderTrackingScreen extends ConsumerWidget {
 
             const SizedBox(height: 24),
             Text(
-              'Real-Time Dispatch Timeline',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+              'Real-Time Fulfillment Timeline',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
 
-            // Timeline Steps
+            // Live 5-Step Status Timeline
             ...statusSteps.asMap().entries.map((entry) {
               final idx = entry.key;
               final step = entry.value;
@@ -142,7 +297,7 @@ class OrderTrackingScreen extends ConsumerWidget {
                       if (idx < statusSteps.length - 1)
                         Container(
                           width: 2,
-                          height: 42,
+                          height: 40,
                           color: isDone ? AppColors.primaryGreen : Colors.grey[300],
                         ),
                     ],
@@ -175,11 +330,87 @@ class OrderTrackingScreen extends ConsumerWidget {
               );
             }),
 
+            const SizedBox(height: 16),
+            const Divider(),
+            const SizedBox(height: 12),
+
+            // Itemized Order Contents Card
+            Text(
+              'Order Items Breakdown (${selectedOrder.items.length} produce)',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 10),
+
+            Card(
+              elevation: 1,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              child: Padding(
+                padding: const EdgeInsets.all(14),
+                child: Column(
+                  children: [
+                    ...selectedOrder.items.map(
+                      (item) => Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 6),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.eco_outlined, color: AppColors.primaryGreen, size: 18),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      '${item.productName} (x${item.quantity.toStringAsFixed(0)})',
+                                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Text(
+                              '₹${item.totalPrice.toStringAsFixed(2)}',
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const Divider(height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text('Delivery Fee:', style: TextStyle(color: AppColors.textMuted, fontSize: 13)),
+                        Text(
+                          selectedOrder.deliveryFee == 0 ? 'FREE' : '₹${selectedOrder.deliveryFee.toStringAsFixed(2)}',
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text('Total Amount Paid:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                        Text(
+                          '₹${selectedOrder.totalAmount.toStringAsFixed(2)}',
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.primaryGreen),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
             const SizedBox(height: 24),
-            ElevatedButton.icon(
-              onPressed: () => context.go('/consumer/home'),
-              icon: const Icon(Icons.home),
-              label: const Text('Return to Home'),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () => context.go('/consumer/home'),
+                icon: const Icon(Icons.storefront),
+                label: const Text('Return to Marketplace'),
+              ),
             ),
           ],
         ),

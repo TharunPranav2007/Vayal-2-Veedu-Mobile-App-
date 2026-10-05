@@ -266,22 +266,37 @@ class _ConsumerHomeScreenState extends ConsumerState<ConsumerHomeScreen> {
                               // Product Thumbnail Container
                               Stack(
                                 children: [
-                                  Container(
+                                  SizedBox(
                                     height: 110,
                                     width: double.infinity,
-                                    color: AppColors.surfaceSubtleGreen,
-                                    child: Center(
-                                      child: Icon(
-                                        p.categoryName == 'Greens'
-                                            ? Icons.grass
-                                            : p.categoryName == 'Fruits'
-                                                ? Icons.apple
-                                                : p.categoryName == 'Grains'
-                                                    ? Icons.grain
-                                                    : Icons.eco,
-                                        size: 52,
-                                        color: AppColors.primaryGreen,
+                                    child: Image.network(
+                                      p.imageUrls.isNotEmpty ? p.imageUrls.first : '',
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (context, error, stackTrace) => Container(
+                                        color: AppColors.surfaceSubtleGreen,
+                                        child: Center(
+                                          child: Icon(
+                                            p.categoryName == 'Greens'
+                                                ? Icons.grass
+                                                : p.categoryName == 'Fruits'
+                                                    ? Icons.apple
+                                                    : p.categoryName == 'Grains'
+                                                        ? Icons.grain
+                                                        : Icons.eco,
+                                            size: 52,
+                                            color: AppColors.primaryGreen,
+                                          ),
+                                        ),
                                       ),
+                                      loadingBuilder: (context, child, loadingProgress) {
+                                        if (loadingProgress == null) return child;
+                                        return Container(
+                                          color: AppColors.surfaceSubtleGreen,
+                                          child: const Center(
+                                            child: CircularProgressIndicator(strokeWidth: 2),
+                                          ),
+                                        );
+                                      },
                                     ),
                                   ),
                                   Positioned(

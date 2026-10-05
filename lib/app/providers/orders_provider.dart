@@ -23,7 +23,7 @@ class OrdersNotifier extends StateNotifier<List<OrderModel>> {
               OrderItemModel(
                 id: 'item-1',
                 productId: 'p1',
-                productName: 'Country Organic Tomatoes',
+                productName: 'Country Red Organic Tomatoes',
                 unitPrice: 40.0,
                 quantity: 2.0,
                 totalPrice: 80.0,
@@ -31,7 +31,7 @@ class OrdersNotifier extends StateNotifier<List<OrderModel>> {
               OrderItemModel(
                 id: 'item-2',
                 productId: 'p2',
-                productName: 'Fresh Organic Palak (Spinach)',
+                productName: 'Fresh Farm Palak (Spinach)',
                 unitPrice: 20.0,
                 quantity: 1.0,
                 totalPrice: 20.0,
@@ -41,7 +41,7 @@ class OrdersNotifier extends StateNotifier<List<OrderModel>> {
           OrderModel(
             id: 'ord-102',
             orderNumber: 'ORD-8822',
-            consumerId: 'cons-2',
+            consumerId: 'cons-1',
             farmerId: 'f2',
             subtotal: 170.0,
             deliveryFee: 0.0,
@@ -61,10 +61,70 @@ class OrdersNotifier extends StateNotifier<List<OrderModel>> {
               OrderItemModel(
                 id: 'item-4',
                 productId: 'p4',
-                productName: 'Sweet Farm Bananas',
+                productName: 'Organic Tanjore Bananas',
                 unitPrice: 50.0,
                 quantity: 1.0,
                 totalPrice: 50.0,
+              ),
+            ],
+          ),
+          OrderModel(
+            id: 'ord-103',
+            orderNumber: 'ORD-8820',
+            consumerId: 'cons-1',
+            farmerId: 'f1',
+            subtotal: 215.0,
+            deliveryFee: 30.0,
+            discount: 0.0,
+            totalAmount: 255.75,
+            status: OrderStatus.DELIVERED,
+            createdAt: DateTime.now().subtract(const Duration(days: 1)),
+            items: [
+              OrderItemModel(
+                id: 'item-5',
+                productId: 'p5',
+                productName: 'Traditional Brown Rice',
+                unitPrice: 85.0,
+                quantity: 2.0,
+                totalPrice: 170.0,
+              ),
+              OrderItemModel(
+                id: 'item-6',
+                productId: 'p7',
+                productName: 'Fresh Tender Coconuts',
+                unitPrice: 45.0,
+                quantity: 1.0,
+                totalPrice: 45.0,
+              ),
+            ],
+          ),
+          OrderModel(
+            id: 'ord-104',
+            orderNumber: 'ORD-8823',
+            consumerId: 'cons-2',
+            farmerId: 'f3',
+            subtotal: 120.0,
+            deliveryFee: 30.0,
+            discount: 0.0,
+            totalAmount: 156.0,
+            status: OrderStatus.PLACED,
+            createdAt: DateTime.now().subtract(const Duration(minutes: 10)),
+            items: [
+              OrderItemModel(
+                id: 'item-7',
+                productId: 'p6',
+                productName: 'Fresh Farm Bell Peppers',
+                unitPrice: 75.0,
+                quantity: 1.0,
+                totalPrice: 75.0,
+              ),
+              OrderItemModel(
+                id: 'item-8',
+                productId: 'p7',
+                productName: 'Fresh Tender Coconuts',
+                unitPrice: 45.0,
+                quantity: 1.0,
+                totalPrice: 45.0,
               ),
             ],
           ),
@@ -83,7 +143,7 @@ class OrdersNotifier extends StateNotifier<List<OrderModel>> {
     if (cartItems.isEmpty) return;
 
     final orderId = 'ord-${DateTime.now().millisecondsSinceEpoch.toString().substring(7)}';
-    final orderNum = 'ORD-${(1000 + state.length + 1)}';
+    final orderNum = 'ORD-${(8824 + state.length)}';
 
     final orderItems = cartItems
         .map(

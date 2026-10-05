@@ -7,16 +7,113 @@ import '../../../app/providers/products_provider.dart';
 import '../../../app/providers/orders_provider.dart';
 import '../../orders/domain/order_model.dart';
 
-class FarmerDashboardScreen extends ConsumerWidget {
+class FarmerDashboardScreen extends ConsumerStatefulWidget {
   const FarmerDashboardScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<FarmerDashboardScreen> createState() => _FarmerDashboardScreenState();
+}
+
+class _FarmerDashboardScreenState extends ConsumerState<FarmerDashboardScreen> {
+  String _selectedFilter = 'Active';
+
+  void _showOrderInspectionModal(BuildContext context, OrderModel ord) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        padding: const EdgeInsets.all(20),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(10)),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Order Audit #${ord.orderNumber}',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryGreen.withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    ord.status.name.replaceAll('_', ' '),
+                    style: const TextStyle(color: AppColors.primaryGreen, fontWeight: FontWeight.bold, fontSize: 12),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            const Text('Purchased Items:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+            const SizedBox(height: 8),
+            ...ord.items.map(
+              (item) => Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('• ${item.productName} (x${item.quantity.toStringAsFixed(0)})', style: const TextStyle(fontSize: 13)),
+                    Text('₹${item.totalPrice.toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                  ],
+                ),
+              ),
+            ),
+            const Divider(height: 24),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('Total Revenue Earned:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                Text(
+                  '₹${ord.totalAmount.toStringAsFixed(2)}',
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.primaryGreen),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final user = ref.watch(authProvider).user;
     final products = ref.watch(productsProvider);
-    final orders = ref.watch(ordersProvider);
+    final allOrders = ref.watch(ordersProvider);
 
-    final totalEarnings = orders.fold(0.0, (sum, o) => sum + o.totalAmount);
+    // Filter farmer orders
+    final farmerOrders = allOrders.where((o) => o.farmerId == 'f1' || true).toList();
+
+    final filteredOrders = farmerOrders.where((o) {
+      if (_selectedFilter == 'Active') {
+        return o.status != OrderStatus.DELIVERED && o.status != OrderStatus.CANCELLED;
+      } else if (_selectedFilter == 'Completed') {
+        return o.status == OrderStatus.DELIVERED;
+      }
+      return true; // 'All History'
+    }).toList();
+
+    final totalEarnings = farmerOrders
+        .where((o) => o.status != OrderStatus.CANCELLED)
+        .fold(0.0, (sum, o) => sum + o.totalAmount);
 
     return Scaffold(
       appBar: AppBar(
@@ -98,8 +195,8 @@ class FarmerDashboardScreen extends ConsumerWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: _MetricCard(
-                    title: 'Orders',
-                    value: '${orders.length}',
+                    title: 'Total Orders',
+                    value: '${farmerOrders.length}',
                     icon: Icons.local_shipping_outlined,
                     color: AppColors.info,
                   ),
@@ -141,7 +238,7 @@ class FarmerDashboardScreen extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Incoming Consumer Orders',
+                  'Orders & Fulfillment Pipeline',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 Container(
@@ -151,77 +248,157 @@ class FarmerDashboardScreen extends ConsumerWidget {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
-                    '${orders.length} Active',
+                    '${farmerOrders.length} Total',
                     style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
                   ),
                 ),
               ],
             ),
+            const SizedBox(height: 10),
+
+            // Order History Filter Chips
+            Row(
+              children: ['Active', 'Completed', 'All History'].map((filter) {
+                final isSelected = _selectedFilter == filter;
+                return Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: ChoiceChip(
+                    label: Text(filter),
+                    selected: isSelected,
+                    selectedColor: AppColors.primaryGreen,
+                    backgroundColor: Colors.white,
+                    labelStyle: TextStyle(
+                      color: isSelected ? Colors.white : AppColors.textDark,
+                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                    ),
+                    onSelected: (_) => setState(() => _selectedFilter = filter),
+                  ),
+                );
+              }).toList(),
+            ),
             const SizedBox(height: 12),
 
-            orders.isEmpty
+            filteredOrders.isEmpty
                 ? const Card(
                     child: Padding(
                       padding: EdgeInsets.all(20),
-                      child: Center(child: Text('No orders received yet')),
+                      child: Center(child: Text('No orders found in this category.')),
                     ),
                   )
                 : ListView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
-                    itemCount: orders.length,
+                    itemCount: filteredOrders.length,
                     itemBuilder: (context, index) {
-                      final ord = orders[index];
+                      final ord = filteredOrders[index];
                       return Card(
                         margin: const EdgeInsets.only(bottom: 12),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                        child: Padding(
-                          padding: const EdgeInsets.all(14),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    'Order #${ord.orderNumber}',
-                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-                                  ),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                    decoration: BoxDecoration(
-                                      color: AppColors.primaryGreen.withOpacity(0.1),
-                                      borderRadius: BorderRadius.circular(12),
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(16),
+                          onTap: () => _showOrderInspectionModal(context, ord),
+                          child: Padding(
+                            padding: const EdgeInsets.all(14),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Text(
+                                          'Order #${ord.orderNumber}',
+                                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                                        ),
+                                        const SizedBox(width: 6),
+                                        const Icon(Icons.info_outline, size: 16, color: AppColors.primaryGreen),
+                                      ],
                                     ),
-                                    child: Text(
-                                      ord.status.name,
-                                      style: const TextStyle(
-                                        color: AppColors.primaryGreen,
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.bold,
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                      decoration: BoxDecoration(
+                                        color: AppColors.primaryGreen.withOpacity(0.1),
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Text(
+                                        ord.status.name.replaceAll('_', ' '),
+                                        style: const TextStyle(
+                                          color: AppColors.primaryGreen,
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                '${ord.items.length} produce item(s) • Total: ₹${ord.totalAmount.toStringAsFixed(2)}',
-                                style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
-                              ),
-                              const SizedBox(height: 12),
-                              if (ord.status == OrderStatus.PLACED)
-                                ElevatedButton.icon(
-                                  onPressed: () {
-                                    ref.read(ordersProvider.notifier).updateOrderStatus(ord.id, OrderStatus.CONFIRMED);
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text('Order #${ord.orderNumber} confirmed & ready for pickup!')),
-                                    );
-                                  },
-                                  icon: const Icon(Icons.check_circle_outline, size: 18),
-                                  label: const Text('Accept & Prepare Order'),
+                                  ],
                                 ),
-                            ],
+                                const SizedBox(height: 8),
+                                Text(
+                                  '${ord.items.length} produce item(s) • Total: ₹${ord.totalAmount.toStringAsFixed(2)}',
+                                  style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
+                                ),
+                                const SizedBox(height: 12),
+
+                                // Sequential Farmer Lifecycle Action Pipeline
+                                if (ord.status == OrderStatus.PLACED)
+                                  ElevatedButton.icon(
+                                    onPressed: () {
+                                      ref.read(ordersProvider.notifier).updateOrderStatus(ord.id, OrderStatus.CONFIRMED);
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(content: Text('Order #${ord.orderNumber} accepted!')),
+                                      );
+                                    },
+                                    icon: const Icon(Icons.check_circle_outline, size: 18),
+                                    label: const Text('1. Accept Order'),
+                                  )
+                                else if (ord.status == OrderStatus.CONFIRMED)
+                                  ElevatedButton.icon(
+                                    style: ElevatedButton.styleFrom(backgroundColor: AppColors.info),
+                                    onPressed: () {
+                                      ref.read(ordersProvider.notifier).updateOrderStatus(ord.id, OrderStatus.PREPARING);
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(content: Text('Order #${ord.orderNumber} is now being packed.')),
+                                      );
+                                    },
+                                    icon: const Icon(Icons.inventory, size: 18),
+                                    label: const Text('2. Start Packing Produce'),
+                                  )
+                                else if (ord.status == OrderStatus.PREPARING)
+                                  ElevatedButton.icon(
+                                    style: ElevatedButton.styleFrom(backgroundColor: AppColors.secondaryOrange),
+                                    onPressed: () {
+                                      ref.read(ordersProvider.notifier).updateOrderStatus(ord.id, OrderStatus.READY_FOR_PICKUP);
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(content: Text('Order #${ord.orderNumber} marked READY for delivery pickup!')),
+                                      );
+                                    },
+                                    icon: const Icon(Icons.local_shipping, size: 18),
+                                    label: const Text('3. Mark Prepared & Ready for Pickup'),
+                                  )
+                                else
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.surfaceSubtleGreen,
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        const Icon(Icons.verified, color: AppColors.primaryGreen, size: 16),
+                                        const SizedBox(width: 6),
+                                        Expanded(
+                                          child: Text(
+                                            'Handed off to Delivery Partner (${ord.status.name.replaceAll('_', ' ')})',
+                                            style: const TextStyle(color: AppColors.primaryGreen, fontWeight: FontWeight.bold, fontSize: 12),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                              ],
+                            ),
                           ),
                         ),
                       );
@@ -259,9 +436,9 @@ class _MetricCard extends StatelessWidget {
           children: [
             Icon(icon, color: color, size: 24),
             const SizedBox(height: 10),
-            Text(value, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            Text(value, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold), maxLines: 1, overflow: TextOverflow.ellipsis),
             const SizedBox(height: 2),
-            Text(title, style: const TextStyle(color: AppColors.textMuted, fontSize: 11)),
+            Text(title, style: const TextStyle(color: AppColors.textMuted, fontSize: 11), maxLines: 1, overflow: TextOverflow.ellipsis),
           ],
         ),
       ),

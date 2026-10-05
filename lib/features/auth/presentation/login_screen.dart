@@ -22,9 +22,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   void initState() {
     super.initState();
-    // Preset demo login based on selected role for easy academic evaluation
-    final roleName = userRoleToString(widget.role).toLowerCase();
-    _emailController = TextEditingController(text: '$roleName@vayal2veedu.com');
+    // Preset demo login based on selected role for easy evaluation
+    String emailText;
+    switch (widget.role) {
+      case UserRole.FARMER:
+        emailText = 'farmer@vayal2veedu.com';
+        break;
+      case UserRole.CONSUMER:
+        emailText = 'consumer@vayal2veedu.com';
+        break;
+      case UserRole.DELIVERY_PARTNER:
+        emailText = 'delivery@vayal2veedu.com';
+        break;
+      case UserRole.ADMIN:
+        emailText = 'admin@vayal2veedu.com';
+        break;
+    }
+    _emailController = TextEditingController(text: emailText);
     _passwordController = TextEditingController(text: 'Password123!');
   }
 
