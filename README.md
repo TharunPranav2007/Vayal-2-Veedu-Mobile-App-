@@ -20,7 +20,8 @@
 
 ## 📖 Table of Contents
 - [📌 Project Overview](#-project-overview)
-- [✨ What's New in Version 2.0](#-whats-new-in-version-20)
+- [🌟 What's New in Version 2.1](#-whats-new-in-version-21)
+- [✨ Features in Version 2.0](#-features-in-version-20)
 - [⚡ Multi-Role Matrix & Demo Credentials](#-multi-role-matrix--demo-credentials)
 - [📐 System Architecture & Order Pipeline](#-system-architecture--order-pipeline)
 - [🎨 Design System & UI Highlights](#-design-system--ui-highlights)
@@ -36,39 +37,58 @@
 
 **FarmDirect (Vayal 2 Veedu / வயல் 2 வீடு)** is an end-to-end mobile and backend platform engineered to eliminate multi-tiered agricultural intermediaries. By connecting growers directly with households, the platform ensures:
 
-- 🌾 **For Farmers:** Fair pricing, 100% direct revenue retention, and automated order status pipelines.
-- 🛒 **For Consumers:** Fresh, pesticide-free, traceable farm produce at fair market prices with multi-order live dispatch tracking.
+- 🌾 **For Farmers:** Fair pricing, 100% direct revenue retention, automated order status pipelines, and reason-based order cancellation control.
+- 🛒 **For Consumers:** Fresh, pesticide-free, traceable farm produce at fair market prices with farm origin attribution and multi-order live dispatch tracking.
 - 🛵 **For Delivery Partners:** Real-time job dispatches, interactive job detail inspection, customer/farm contact shortcuts, and route coordinates.
-- 🛡️ **For Administrators:** Platform-wide GMV analytics, verified farmer/rider moderation, and full transaction oversight.
+- 🛡️ **For Administrators:** Platform-wide GMV analytics, verified farmer/rider moderation, and full transaction oversight with protected credentials.
 
 ---
 
-## ✨ What's New in Version 2.0
+## 🌟 What's New in Version 2.1
+
+> [!IMPORTANT]
+> **Version 2.1 Major Release & Usability Upgrade**
+
+### 📱 1. Standardized App Branding Header (`AppStandardHeader`)
+- Integrated a uniform top navigation app bar featuring the official circular `app_logo_icon.png` logo, the app title **Vayal 2 Veedu**, and context-aware role subtitles (*Consumer Direct Marketplace*, *Farmer Direct Portal*, *Delivery Fleet Portal*, *Platform Administrator*, *Order Tracking & History*).
+
+### 👤 2. Professional & Role-Specific Editable Profiles
+- Upgraded `AuthProvider` and `ProfileScreen` with bottom-sheet editing for all 4 user roles:
+  - **Farmers:** Farm Name, Location/District, Land Area (Acres), Primary Produce, FSSAI License No, Payout UPI.
+  - **Consumers:** Delivery Address, Landmark, Alternate Contact Phone, Delivery Time Preferences.
+  - **Delivery Partners:** Vehicle Type, Vehicle Reg No, Driving License No, Service Zone, Emergency Contact.
+  - **Platform Administrator:** Admin Title/Designation, Department Division, Clearance Level, Audit Clearance.
+
+### 🛡️ 3. Platform Administrator Credential Enforcement & Security
+- Updated Administrator credentials to `tharunpranavt@vayal2veedu.com` / `TPadmin@V2V`.
+- Hidden the *"Register Now"* link on the Platform Administrator login portal to enforce a strict single-admin policy.
+
+### 🌾 4. Farmer Order Cancellation & Rejection Workflow
+- Added an interactive **Reject Order** option alongside **Accept Order** for Farmers.
+- Includes a cancellation reason selection dialog (*Harvest Shortfall*, *Weather Damage*, *Logistics Unavailable*, or *Custom Reason*) and displays a red warning banner across Farmer, Consumer, and Delivery views.
+
+### 📍 5. Farm & Farmer Origin Attribution
+- Embedded Farm Name and Farmer contact details into order models, displaying farm origin on Consumer Order Tracking screens and Delivery Partner Job Detail modals.
+
+### 🖼️ 6. Produce Visual Asset Rectification & Layout Stability
+- Replaced broken produce images (e.g. Crisp Sweet Carrots) with crisp Unsplash produce photos.
+- Resolved all `RenderFlex` layout overflow exceptions across varying screen widths.
+
+---
+
+## ✨ Features in Version 2.0
 
 > [!TIP]
-> **Major Feature Additions & Platform Enhancements**
+> **Base Version 2.0 Features**
 
 ### 📱 1. Multi-Order Live Tracking (`/consumer/orders/track`)
-- Consumers can now view and track **all placed orders** (not just the latest single order) sequentially.
-- Features a live 5-step animated progress timeline (`Placed` ➔ `Confirmed` ➔ `Preparing` ➔ `Out for Delivery` ➔ `Delivered`).
+- Consumers can view and track **all placed orders** sequentially with a live 5-step animated progress timeline.
 
 ### 🛵 2. Interactive Delivery Job Detail Inspector
-- Delivery partners can tap any available job in their portal to launch a rich bottom-sheet modal.
-- Includes exact farm pickup address, customer dropoff location, itemized produce breakdown, and 1-tap **Call Farm** & **Call Customer** actions.
+- Delivery partners can launch a bottom-sheet modal with farm pickup address, customer dropoff location, itemized produce breakdown, and 1-tap **Call Farm** & **Call Customer** actions.
 
 ### 🌾 3. Sequential Farmer Order Pipeline
-- Farmers can transition incoming orders step-by-step (`1. Confirm Order` ➔ `2. Start Packing` ➔ `3. Ready for Pickup`), keeping all 4 user roles perfectly in sync.
-
-### 🔑 4. One-Tap Role Auto-Fill Login
-- Pre-filled demo credentials across all login portals for instant one-tap access without typing credentials manually.
-
-### 🛡️ 5. Security & Authorization Hardening
-- Backend NestJS JWT authentication & RBAC guards across `/products` and `/orders` APIs.
-- IDOR (Insecure Direct Object Reference) protection enforcing strict user resource ownership.
-
-### 📱 6. Layout & Rendering Performance Fixes
-- Replaced shrinkwrap sliver viewports with optimized static flex rendering, eliminating all Flutter layout assertion crashes across all mobile screen dimensions.
-- Enabled Android 13+ Predictive Back gesture compatibility in `AndroidManifest.xml`.
+- Farmers transition incoming orders step-by-step (`1. Confirm Order` ➔ `2. Start Packing` ➔ `3. Ready for Pickup`).
 
 ---
 
@@ -76,10 +96,10 @@
 
 | Role | Symbol | Portal Route | Pre-filled Email | Password | Key Functionalities |
 | :--- | :---: | :--- | :--- | :--- | :--- |
-| **Farmer** | 🌾 | `/farmer/dashboard` | `farmer@vayal2veedu.com` | `Password123!` | • Publish & edit produce listings with pricing & stock<br>• Realtime revenue metrics (GMV & Active Produce)<br>• Sequential 3-step order acceptance & packing pipeline |
-| **Consumer** | 🛒 | `/consumer/home` | `consumer@vayal2veedu.com` | `Password123!` | • Organic produce catalog with category filters<br>• Dynamic shopping cart with live GST (5%) & delivery calculation<br>• Live multi-order fulfillment tracking timeline |
+| **Farmer** | 🌾 | `/farmer/dashboard` | `farmer@vayal2veedu.com` | `Password123!` | • Publish & edit produce listings with pricing & stock<br>• Realtime revenue metrics (GMV & Active Produce)<br>• Order acceptance & rejection workflow |
+| **Consumer** | 🛒 | `/consumer/home` | `consumer@vayal2veedu.com` | `Password123!` | • Organic produce catalog with category filters<br>• Dynamic shopping cart with live GST (5%) & delivery calculation<br>• Live multi-order tracking & farm origin attribution |
 | **Delivery Partner** | 🛵 | `/delivery/dashboard` | `delivery@vayal2veedu.com` | `Password123!` | • Available dispatch jobs queue<br>• Interactive job details modal with farm & customer contact buttons<br>• Milestone status toggles (`Pick Up` ➔ `Deliver`) |
-| **Administrator** | 🛡️ | `/admin/dashboard` | `admin@vayal2veedu.com` | `Password123!` | • System-wide GMV & order volume analytics<br>• Verified farmer profiles & delivery partner moderation<br>• Live transaction oversight & dispatch inspection |
+| **Administrator** | 🛡️ | `/admin/dashboard` | `tharunpranavt@vayal2veedu.com` | `TPadmin@V2V` | • System-wide GMV & order volume analytics<br>• Single-admin credential restriction & RBAC moderation<br>• Live transaction oversight & dispatch inspection |
 
 ---
 
