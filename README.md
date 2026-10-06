@@ -58,11 +58,11 @@
 
 | Portal / Module | High-Resolution App Preview | Key Operational Highlight |
 | :--- | :---: | :--- |
-| **Portal Switcher & Auth** | ![Role Switcher](App%20Screenshots/Different%20Users%20Login.png) | Single-tap entrance portal to toggle seamlessly between Farmer, Consumer, Rider, and Admin views |
-| **Farmer Operations** | ![Farmer Dashboard](App%20Screenshots/Farmer%20Module%20-%201.png) | Real-time GMV revenue tracking, direct produce listing, and reason-based order rejection controls |
-| **Consumer Marketplace** | ![Consumer Marketplace](App%20Screenshots/Consumer%20Module%20-%201.png) | HD produce catalog, live 5% GST itemization, farm origin attribution, and 5-step dispatch tracking |
-| **Delivery Logistics** | ![Delivery Job Inspector](App%20Screenshots/Delivery%20Job%20Details.png) | Interactive bottom-sheet job inspector, farm/customer contact shortcuts, and pickup/delivery toggles |
-| **Admin Governance** | ![Admin Analytics](App%20Screenshots/Admin%20Module%20-%201.png) | Platform-wide GMV metrics, farmer land verification, fleet moderation, and single-admin security |
+| **Portal Switcher & Auth** | ![Role Switcher](App_Screenshots/Different%20Users%20Login.png) | Single-tap entrance portal to toggle seamlessly between Farmer, Consumer, Rider, and Admin views |
+| **Farmer Operations** | ![Farmer Dashboard](App_Screenshots/Farmer%20Module%20-%201.png) | Real-time GMV revenue tracking, direct produce listing, and reason-based order rejection controls |
+| **Consumer Marketplace** | ![Consumer Marketplace](App_Screenshots/Consumer%20Module%20-%201.png) | HD produce catalog, live 5% GST itemization, farm origin attribution, and 5-step dispatch tracking |
+| **Delivery Logistics** | ![Delivery Job Inspector](App_Screenshots/Delivery%20Job%20Details.png) | Interactive bottom-sheet job inspector, farm/customer contact shortcuts, and pickup/delivery toggles |
+| **Admin Governance** | ![Admin Analytics](App_Screenshots/Admin%20Module%20-%201.png) | Platform-wide GMV metrics, farmer land verification, fleet moderation, and single-admin security |
 
 ---
 
