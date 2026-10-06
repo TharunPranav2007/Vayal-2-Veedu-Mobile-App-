@@ -20,6 +20,7 @@
 
 ## 📖 Table of Contents
 - [📌 Project Overview](#-project-overview)
+- [📊 App Review Presentation & Visual Showcase](#-app-review-presentation--visual-showcase)
 - [🌟 What's New in Version 2.1](#-whats-new-in-version-21)
 - [✨ Features in Version 2.0](#-features-in-version-20)
 - [⚡ Multi-Role Matrix & Demo Credentials](#-multi-role-matrix--demo-credentials)
@@ -41,6 +42,26 @@
 - 🛒 **For Consumers:** Fresh, pesticide-free, traceable farm produce at fair market prices with farm origin attribution and multi-order live dispatch tracking.
 - 🛵 **For Delivery Partners:** Real-time job dispatches, interactive job detail inspection, customer/farm contact shortcuts, and route coordinates.
 - 🛡️ **For Administrators:** Platform-wide GMV analytics, verified farmer/rider moderation, and full transaction oversight with protected credentials.
+
+---
+
+## 📊 App Review Presentation & Visual Showcase
+
+> [!TIP]
+> **Complete App Review Assets Available for Demonstration**
+
+- 🖥️ **Interactive Web Presentation Slide Deck:** Open [`presentation_slides.html`](presentation_slides.html) directly in any web browser to present interactive slides with a click-to-zoom Lightbox modal and keyboard navigation.
+- 📊 **Native Widescreen PowerPoint Presentation:** Download [`Vayal_2_Veedu_App_Review.pptx`](Vayal_2_Veedu_App_Review.pptx) (16:9 9-slide deck with all 23 high-resolution app screenshots and module summaries).
+
+### 📱 Visual Highlights Across Portals
+
+| Portal / Module | High-Resolution App Preview | Key Operational Highlight |
+| :--- | :---: | :--- |
+| **Portal Switcher & Auth** | ![Role Switcher](App%20Screenshots/Different%20Users%20Login.png) | Single-tap entrance portal to toggle seamlessly between Farmer, Consumer, Rider, and Admin views |
+| **Farmer Operations** | ![Farmer Dashboard](App%20Screenshots/Farmer%20Module%20-%201.png) | Real-time GMV revenue tracking, direct produce listing, and reason-based order rejection controls |
+| **Consumer Marketplace** | ![Consumer Marketplace](App%20Screenshots/Consumer%20Module%20-%201.png) | HD produce catalog, live 5% GST itemization, farm origin attribution, and 5-step dispatch tracking |
+| **Delivery Logistics** | ![Delivery Job Inspector](App%20Screenshots/Delivery%20Job%20Details.png) | Interactive bottom-sheet job inspector, farm/customer contact shortcuts, and pickup/delivery toggles |
+| **Admin Governance** | ![Admin Analytics](App%20Screenshots/Admin%20Module%20-%201.png) | Platform-wide GMV metrics, farmer land verification, fleet moderation, and single-admin security |
 
 ---
 

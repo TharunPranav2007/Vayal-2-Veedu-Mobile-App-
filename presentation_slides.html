@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FarmDirect — Vayal 2 Veedu (வயல் 2 வீடு) App Review Presentation</title>
+  <style>
+    :root {
+      --primary-green: #1E5631;
+      --secondary-orange: #F9690E;
+      --info-blue: #0288D1;
+      --bg-dark: #0f1411;
+      --card-bg: #18221b;
+      --text-light: #f4f6f4;
+      --text-muted: #a0afa3;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      background-color: var(--bg-dark);
+      color: var(--text-light);
+      overflow: hidden;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top Navigation Header */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 28px;
+      background-color: rgba(15, 20, 17, 0.98);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      z-index: 100;
+      flex-shrink: 0;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .brand-icon {
+      font-size: 1.4rem;
+    }
+
+    .slide-counter {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--secondary-orange);
+      background: rgba(249, 105, 14, 0.15);
+      padding: 4px 14px;
+      border-radius: 20px;
+      border: 1px solid rgba(249, 105, 14, 0.3);
+    }
+
+    /* Main Slides Container */
+    .slides-wrapper {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .slide {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      transform: translateY(8px);
+      padding: 20px 32px;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+
+    .slide.active {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    /* Slide Header Area */
+    .slide-header {
+      margin-bottom: 16px;
+      flex-shrink: 0;
+    }
+
+    .slide-title {
+      font-size: 1.65rem;
+      font-weight: 800;
+      color: #ffffff;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .slide-subtitle {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    /* Layout Grids */
+    .content-grid {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 24px;
+      align-items: start;
+      flex: 1;
+    }
+
+    .full-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      flex: 1;
+    }
+
+    /* Image Gallery & Cards */
+    .image-gallery {
+      display: grid;
+      gap: 12px;
+      width: 100%;
+    }
+
+    .gallery-2 { grid-template-columns: repeat(2, 1fr); }
+    .gallery-3 { grid-template-columns: repeat(3, 1fr); }
+
+    .img-card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 10px;
+      cursor: pointer;
+      position: relative;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .img-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--secondary-orange);
+    }
+
+    .img-card::after {
+      content: "🔍 Click to Zoom";
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: rgba(0, 0, 0, 0.75);
+      color: #fff;
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 4px 8px;
+      border-radius: 12px;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+
+    .img-card:hover::after {
+      opacity: 1;
+    }
+
+    .img-card img {
+      max-height: 250px;
+      width: auto;
+      max-width: 100%;
+      object-fit: contain;
+      border-radius: 8px;
+    }
+
+    .img-card .caption {
+      margin-top: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-align: center;
+      color: var(--text-light);
+    }
+
+    /* Single Featured Image Card */
+    .single-img-card {
+      background: var(--card-bg);
+      border-radius: 14px;
+      padding: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .single-img-card img {
+      max-height: 400px;
+      width: auto;
+      max-width: 100%;
+      object-fit: contain;
+      border-radius: 10px;
+    }
+
+    .single-img-card .caption {
+      margin-top: 10px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-light);
+    }
+
+    /* Info Bullet Box */
+    .info-box {
+      background: var(--card-bg);
+      border-radius: 14px;
+      padding: 20px 24px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .info-box h3 {
+      font-size: 1.15rem;
+      color: var(--secondary-orange);
+      margin-bottom: 12px;
+    }
+
+    .bullet-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .bullet-list li {
+      position: relative;
+      padding-left: 20px;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      color: var(--text-light);
+    }
+
+    .bullet-list li::before {
+      content: "➔";
+      position: absolute;
+      left: 0;
+      color: var(--primary-green);
+      font-weight: bold;
+    }
+
+    /* Feature Badge Table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 8px;
+    }
+
+    th, td {
+      padding: 10px 14px;
+      text-align: left;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      font-size: 0.85rem;
+    }
+
+    th {
+      background: rgba(30, 86, 49, 0.3);
+      color: #fff;
+      font-weight: 700;
+    }
+
+    tr:hover {
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    /* Footer Controls */
+    footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 28px;
+      background-color: rgba(15, 20, 17, 0.98);
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      flex-shrink: 0;
+    }
+
+    .nav-btn {
+      background: var(--primary-green);
+      color: #fff;
+      border: none;
+      padding: 8px 20px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.1s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .nav-btn:hover {
+      background: #276e3f;
+      transform: translateY(-1px);
+    }
+
+    .nav-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .nav-btn.secondary {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .nav-btn.secondary:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    /* Lightbox Modal */
+    .lightbox-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.92);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      padding: 20px;
+    }
+
+    .lightbox-modal.active {
+      display: flex;
+    }
+
+    .lightbox-img {
+      max-width: 90vw;
+      max-height: 85vh;
+      object-fit: contain;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+      border: 2px solid var(--secondary-orange);
+    }
+
+    .lightbox-caption {
+      margin-top: 12px;
+      font-size: 1rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .lightbox-close {
+      position: absolute;
+      top: 20px;
+      right: 30px;
+      color: #fff;
+      font-size: 2.5rem;
+      font-weight: bold;
+      cursor: pointer;
+      background: none;
+      border: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Lightbox Zoom Modal -->
+  <div class="lightbox-modal" id="lightboxModal" onclick="closeLightbox()">
+    <button class="lightbox-close">&times;</button>
+    <img src="" alt="Zoomed Screenshot" class="lightbox-img" id="lightboxImg">
+    <div class="lightbox-caption" id="lightboxCaption"></div>
+  </div>
+
+  <!-- Top Navigation Bar -->
+  <header>
+    <div class="brand">
+      <span class="brand-icon">🌾</span>
+      <span>FarmDirect — Vayal 2 Veedu (வயல் 2 வீடு)</span>
+    </div>
+    <div class="slide-counter" id="slideCounter">Slide 1 of 8</div>
+  </header>
+
+  <!-- Main Slides Container -->
+  <div class="slides-wrapper">
+
+    <!-- Slide 1: App Overview -->
+    <div class="slide active">
+      <div class="slide-header">
+        <div class="slide-title">🌾 Vayal 2 Veedu — Digital Agriculture Marketplace</div>
+        <div class="slide-subtitle">Production-Grade Mobile & Backend Platform Connecting Farmers directly with Households</div>
+      </div>
+      
+      <div class="content-grid">
+        <div class="info-box">
+          <h3>📌 Executive Project Summary</h3>
+          <ul class="bullet-list">
+            <li><strong>Core Mission:</strong> Eliminates multi-tiered agricultural middlemen to provide 100% direct revenue retention for farmers and fresh produce for households.</li>
+            <li><strong>4 Multi-Role Portals:</strong> Dedicated workflows for Farmers, Consumers, Delivery Partners, and Platform Administrators.</li>
+            <li><strong>Production Architecture:</strong> Flutter 3.x (Riverpod 2.x) frontend paired with NestJS 10.x (PostgreSQL 16 + Prisma ORM) backend services.</li>
+            <li><strong>Quality Assurance:</strong> Verified 100% test pass rate across unit and widget test suites (0 errors).</li>
+          </ul>
+        </div>
+        <div class="single-img-card" onclick="openLightbox(this)">
+          <img src="App Screenshots/Vayal 2 Veedu Loading Screen.png" alt="App Splash Screen">
+          <div class="caption">App Splash & Loading Screen</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 2: Login Screens -->
+    <div class="slide">
+      <div class="slide-header">
+        <div class="slide-title">🔐 "Different Users Login" & Portal Access</div>
+        <div class="slide-subtitle">1-Tap Role Selection Portal & Role-Guarded Access Controls</div>
+      </div>
+      
+      <div class="content-grid">
+        <div class="image-gallery gallery-3">
+          <div class="img-card" onclick="openLightbox(this)">
+            <img src="App Screenshots/Different Users Login.png" alt="Role Selection Portal">
+            <div class="caption">Role Switcher Portal</div>
+          </div>
+          <div class="img-card" onclick="openLightbox(this)">
+            <img src="App Screenshots/Farmer Login.png" alt="Farmer Login">
+            <div class="caption">Farmer Login</div>
+          </div>
+          <div class="img-card" onclick="openLightbox(this)">
+            <img src="App Screenshots/Consumer Login.png" alt="Consumer Login">
+            <div class="caption">Consumer Login</div>
+          </div>
+          <div class="img-card" onclick="openLightbox(this)">
+            <img src="App Screenshots/Delivery Login.png" alt="Delivery Login">
+            <div class="caption">Delivery Login</div>
+          </div>
+          <div class="img-card" onclick="openLightbox(this)">
+            <img src="App Screenshots/Admin Login.png" alt="Admin Login">
+            <div class="caption">Admin Login</div>
+          </div>
+        </div>
+
+        <div class="info-box">
+          <h3>🔑 Authentication Highlights</h3>
+          <ul class="bullet-list">
+            <li><strong>Single-Tap Switcher:</strong> Central entrance screen allowing instant selection between all 4 specialized user roles.</li>
+            <li><strong>Pre-filled Demo Triggers:</strong> Built-in demo credentials for seamless evaluator walkthroughs.</li>
+            <li><strong>Single-Admin Restriction:</strong> Platform Administrator login enforces strict credentials (`tharunpranavt@vayal2veedu.com`) with registration links hidden for security.</li>
+            <li><strong>Standardized Branding:</strong> Unified `AppStandardHeader` with `app_logo_icon.png` across all entry portals.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 3: User Profiles -->
+    <div class="slide">
+      <div class="slide-header">
+        <div class="slide-title">👤 User Profile Management Across Roles</div>
+        <div class="slide-subtitle">Role-Specific Metadata, Contact Information, and Settings</div>
+      </div>
+
+      <div class="content-grid">
+        <div class="image-gallery gallery-2">
+          <div class="img-card" onclick="openLightbox(this)">
+            <img src="App Screenshots/Farmer Profile.png" alt="Farmer Profile">
+            <div class="caption">Farmer Profile</div>
+          </div>
+          <div class="img-card" onclick="openLightbox(this)">
+            <img src="App Screenshots/Consumer Profile.png" alt="Consumer Profile">
+            <div class="caption">Consumer Profile</div>
+          </div>
+          <div class="img-card" onclick="openLightbox(this)">
+            <img src="App Screenshots/Delivery Profile.png" alt="Delivery Profile">
+            <div class="caption">Delivery Partner Profile</div>
+          </div>
+          <div class="img-card" onclick="openLightbox(this)">
+            <img src="App Screenshots/Admin Profile.png" alt="Admin Profile">
+            <div class="caption">Platform Admin Profile</div>
+          </div>
+        </div>
+
+        <div class="info-box">
+          <h3>📋 Role-Specific Data Schema</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>User Role</th>
+                <th>Specialized Metadata Fields</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>🌾 Farmer</strong></td>
+                <td>Farm Name, District Location, Land Size (Acres), FSSAI License, Payout UPI</td>
+              </tr>
+              <tr>
+                <td><strong>🛒 Consumer</strong></td>
+                <td>Delivery Address, Landmark, Alternate Contact Phone, Delivery Preferences</td>
+              </tr>
+              <tr>
+                <td><strong>🛵 Delivery Partner</strong></td>
+                <td>Vehicle Type, Reg Number, Driving License No, Service Zone, Emergency Contact</td>
+              </tr>
+              <tr>
+                <td><strong>🛡️ Admin</strong></td>
+                <td>Designation, Division, Clearance Level, Security Audit Clearance Status</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 4: Farmer Module -->
+    <div class="slide">
+      <div class="slide-header">
+        <div class="slide-title">🌾 Farmer Module & Harvest Operations</div>
+        <div class="slide-subtitle">Produce Catalog Publishing, Revenue Analytics, and Order Rejection Controls</div>
+      </div>
+
+      <div class="content-grid">
+        <div class="image-gallery gallery-2">
+          <div class="img-card" onclick="openLightbox(this)">
+            <img src="App Screenshots/Farmer Module - 1.png" alt="Farmer Dashboard">
+            <div class="caption">Farmer Dashboard & Revenue Metrics</div>
+          </div>
+          <div class="img-card" onclick="openLightbox(this)">
+            <img src="App Screenshots/Farmer Module -2.png" alt="Farmer Order Pipeline">
+            <div class="caption">Order Pipeline & Rejection Controls</div>
+          </div>
+        </div>
+
+        <div class="info-box">
+          <h3>🌾 Operational Capabilities</h3>
+          <ul class="bullet-list">
+            <li><strong>Live Revenue Metrics:</strong> Real-time tracking of total gross merchandise value (GMV) and active inventory count.</li>
+            <li><strong>Direct Inventory Listing:</strong> 1-tap produce listing with pricing per unit/kg and instant stock level toggles.</li>
+            <li><strong>Sequential Pipeline:</strong> Transition incoming orders step-by-step (`1. Confirm` ➔ `2. Pack` ➔ `3. Ready for Pickup`).</li>
+            <li><strong>Reason-Based Order Rejection:</strong> Order rejection with dropdown reasons (*Harvest Shortfall*, *Weather Damage*) and clear warning banners.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 5: Consumer Module -->
+    <div class="slide">
+      <div class="slide-header">
+        <div class="slide-title">🛒 Consumer Marketplace & Order Tracking</div>
+        <div class="slide-subtitle">Organic Catalog, Cart GST Itemization, and Live Dispatch Timeline</div>
+      </div>
+
+      <div class="content-grid">
+        <div class="image-gallery gallery-2">
+          <div class="img-card" onclick="openLightbox(this)">
+            <img src="App Screenshots/Consumer Module - 1.png" alt="Organic Catalog">
+            <div class="caption">Organic Produce Catalog</div>
+          </div>
+          <div class="img-card" onclick="openLightbox(this)">
+            <img src="App Screenshots/Consumer Shopping Cart.png" alt="Shopping Cart">
+            <div class="caption">Shopping Cart & GST Split</div>
+          </div>
+          <div class="img-card" onclick="openLightbox(this)">
+            <img src="App Screenshots/Consumer Order Checkout.png" alt="Order Checkout">
+            <div class="caption">Checkout & Address Confirmation</div>
+          </div>
+          <div class="img-card" onclick="openLightbox(this)">
+            <img src="App Screenshots/Consumer Order Tracking.png" alt="Order Tracking">
+            <div class="caption">Live Multi-Order Dispatch Tracking</div>
+          </div>
+        </div>
+
+        <div class="info-box">
+          <h3>🛒 Key Consumer Features</h3>
+          <ul class="bullet-list">
+            <li><strong>HD Produce Photos:</strong> Mapped Unsplash produce assets with 100% accuracy (Carrots, Bell Peppers, Tender Coconuts, Tomatoes).</li>
+            <li><strong>Transparent Calculations:</strong> Shopping cart calculates live subtotal, 5% GST itemization, and delivery charges.</li>
+            <li><strong>Farm Origin Attribution:</strong> Displays exact farm name (e.g. *Green Field Organic Farm*) for complete produce traceability.</li>
+            <li><strong>Live 5-Step Timeline:</strong> Animated multi-order tracking showing real-time dispatch progress.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 6: Delivery Partner Module -->
+    <div class="slide">
+      <div class="slide-header">
+        <div class="slide-title">🛵 Delivery Partner Module & Logistics</div>
+        <div class="slide-subtitle">Available Dispatch Jobs Queue, Farm Pickup & Customer Dropoff Shortcuts</div>
+      </div>
+
+      <div class="content-grid">
+        <div class="image-gallery gallery-2">
+          <div class="img-card" onclick="openLightbox(this)">
+            <img src="App Screenshots/Delivery Module - 1.png" alt="Delivery Dashboard">
+            <div class="caption">Rider Dashboard & Job Queue</div>
+          </div>
+          <div class="img-card" onclick="openLightbox(this)">
+            <img src="App Screenshots/Delivery Job Details.png" alt="Delivery Job Details">
+            <div class="caption">Interactive Job Detail Modal</div>
+          </div>
+        </div>
+
+        <div class="info-box">
+          <h3>🛵 Fleet Management Features</h3>
+          <ul class="bullet-list">
+            <li><strong>Available Dispatch Queue:</strong> Real-time feed of active orders requiring farm pickup across the belt.</li>
+            <li><strong>Job Detail Inspector Modal:</strong> Bottom-sheet inspector displaying farm pickup location, customer dropoff address, and itemized produce list.</li>
+            <li><strong>1-Tap Contact Shortcuts:</strong> Immediate phone action buttons (`Call Farm` & `Call Customer`).</li>
+            <li><strong>Milestone Toggles:</strong> Simple 1-tap status updates (`Pick Up Produce` ➔ `Mark Delivered & Collect Cash`).</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 7: Platform Administrator -->
+    <div class="slide">
+      <div class="slide-header">
+        <div class="slide-title">🛡️ Platform Administrator & System Oversight</div>
+        <div class="slide-subtitle">Platform GMV Analytics, Farmer Verification, and Delivery Fleet Moderation</div>
+      </div>
+
+      <div class="content-grid">
+        <div class="image-gallery gallery-3">
+          <div class="img-card" onclick="openLightbox(this)">
+            <img src="App Screenshots/Admin Module - 1.png" alt="Admin Analytics">
+            <div class="caption">Platform Revenue Analytics</div>
+          </div>
+          <div class="img-card" onclick="openLightbox(this)">
+            <img src="App Screenshots/Admin Module - 2.png" alt="Admin Operational Overview">
+            <div class="caption">System Operational Overview</div>
+          </div>
+          <div class="img-card" onclick="openLightbox(this)">
+            <img src="App Screenshots/Admin Access Manage.png" alt="Admin Access Management">
+            <div class="caption">Access Control Oversight</div>
+          </div>
+          <div class="img-card" onclick="openLightbox(this)">
+            <img src="App Screenshots/Admin Delivery Manage.png" alt="Admin Fleet Moderation">
+            <div class="caption">Delivery Fleet Moderation</div>
+          </div>
+          <div class="img-card" onclick="openLightbox(this)">
+            <img src="App Screenshots/Admin Farmer Manage.png" alt="Admin Farmer Moderation">
+            <div class="caption">Farmer Verification & Audit</div>
+          </div>
+        </div>
+
+        <div class="info-box">
+          <h3>🛡️ Governance & Security</h3>
+          <ul class="bullet-list">
+            <li><strong>Platform Analytics:</strong> Real-time monitoring of Gross Merchandise Value (GMV), total order volume, and active user metrics.</li>
+            <li><strong>Farmer Moderation:</strong> Inspects land acreage, FSSAI licensing, and organic certifications before account verification.</li>
+            <li><strong>Fleet Rider Verification:</strong> Audits driving licenses, vehicle registration status, and designated delivery zones.</li>
+            <li><strong>Audit Logs & RBAC:</strong> Immutable audit logging and strict single-admin role security enforcement.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 8: Technical Review & Conclusion -->
+    <div class="slide">
+      <div class="slide-header">
+        <div class="slide-title">⚡ Architectural Summary & Review Highlights</div>
+        <div class="slide-subtitle">Production Technical Stack & System Verification Matrix</div>
+      </div>
+
+      <div class="full-grid">
+        <div class="info-box">
+          <h3>🛠️ Technology Stack Breakdown</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Layer</th>
+                <th>Technologies & Libraries</th>
+                <th>Highlights</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Mobile App (Frontend)</strong></td>
+                <td>Flutter 3.x, Riverpod 2.x, `go_router` 13.x</td>
+                <td>Declarative role routing, state management, Material 3 design</td>
+              </tr>
+              <tr>
+                <td><strong>Backend Service</strong></td>
+                <td>NestJS 10.x, TypeScript, Node.js</td>
+                <td>RESTful APIs, Socket.IO WebSockets, Swagger OpenAPI (`/api/docs`)</td>
+              </tr>
+              <tr>
+                <td><strong>Database & Storage</strong></td>
+                <td>PostgreSQL 16, Prisma ORM 5.x</td>
+                <td>ACID transactions, structured relation schemas, migration control</td>
+              </tr>
+              <tr>
+                <td><strong>Quality Assurance</strong></td>
+                <td>Flutter Test Runner (`flutter test`)</td>
+                <td>100% unit and widget test pass rate (7/7 tests passed cleanly)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="info-box" style="text-align: center;">
+          <h3 style="color: var(--primary-green);">🎉 Vayal 2 Veedu is Ready for Production App Review!</h3>
+          <p style="color: var(--text-muted); margin-top: 6px;">Direct Field-to-Home Digital Marketplace built with complete architectural integrity, responsive UI, and verified functionality.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Footer Navigation Controls -->
+  <footer>
+    <button class="nav-btn secondary" id="prevBtn" onclick="changeSlide(-1)">◀ Previous</button>
+    <div style="color: var(--text-muted); font-size: 0.85rem;">Use ⬅️ / ➡️ Arrow Keys to Navigate • Click Any Screenshot to Zoom</div>
+    <button class="nav-btn" id="nextBtn" onclick="changeSlide(1)">Next Slide ▶</button>
+  </footer>
+
+  <script>
+    // Automatic fallback for image loading across different OS path formats
+    document.querySelectorAll('img').forEach(img => {
+      img.onerror = function() {
+        if (!this.dataset.retried) {
+          this.dataset.retried = 'true';
+          const originalSrc = this.getAttribute('src');
+          if (originalSrc.includes('App Screenshots')) {
+            this.src = originalSrc.replace('App Screenshots', 'App_Screenshots').replace(/\s+/g, '_');
+          } else if (originalSrc.includes('App_Screenshots')) {
+            this.src = originalSrc.replace('App_Screenshots', 'App Screenshots');
+          }
+        }
+      };
+    });
+
+    // Lightbox Zoom Handler
+    function openLightbox(cardElem) {
+      const img = cardElem.querySelector('img');
+      const caption = cardElem.querySelector('.caption');
+      const modal = document.getElementById('lightboxModal');
+      const modalImg = document.getElementById('lightboxImg');
+      const modalCap = document.getElementById('lightboxCaption');
+
+      if (img) {
+        modalImg.src = img.src;
+        modalCap.textContent = caption ? caption.textContent : img.alt;
+        modal.classList.add('active');
+      }
+    }
+
+    function closeLightbox() {
+      document.getElementById('lightboxModal').classList.remove('active');
+    }
+
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    const counter = document.getElementById('slideCounter');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+
+    function updateSlides() {
+      slides.forEach((slide, index) => {
+        if (index === currentSlide) {
+          slide.classList.add('active');
+        } else {
+          slide.classList.remove('active');
+        }
+      });
+      counter.textContent = `Slide ${currentSlide + 1} of ${slides.length}`;
+      prevBtn.disabled = currentSlide === 0;
+      nextBtn.disabled = currentSlide === slides.length - 1;
+    }
+
+    function changeSlide(direction) {
+      currentSlide += direction;
+      if (currentSlide < 0) currentSlide = 0;
+      if (currentSlide >= slides.length) currentSlide = slides.length - 1;
+      updateSlides();
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeLightbox();
+      } else if (e.key === 'ArrowRight' || e.key === 'Space') {
+        changeSlide(1);
+      } else if (e.key === 'ArrowLeft') {
+        changeSlide(-1);
+      }
+    });
+
+    updateSlides();
+  </script>
+</body>
+</html>
