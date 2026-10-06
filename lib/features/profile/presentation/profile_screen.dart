@@ -356,10 +356,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         ],
                       ),
                     ),
-                    IconButton(
-                      icon: const Icon(Icons.edit, color: AppColors.primaryGreen),
-                      onPressed: () => _showEditBasicProfileModal(context, user),
-                    ),
                   ],
                 ),
               ),
@@ -376,7 +372,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('Personal Contact Info', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                        const Row(
+                          children: [
+                            Icon(Icons.person_pin_outlined, color: AppColors.primaryGreen, size: 20),
+                            SizedBox(width: 8),
+                            Text('Personal Contact Info', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                          ],
+                        ),
                         TextButton(
                           onPressed: () => _showEditBasicProfileModal(context, user),
                           child: const Text('Edit'),
@@ -405,7 +407,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             // Role-Specific Profile Extension Card
             if (role == UserRole.FARMER)
               _buildRoleProfileCard(
-                title: '🌾 Farmer & Farm Details',
+                title: 'Farmer & Farm Details',
                 icon: Icons.agriculture,
                 color: AppColors.primaryGreen,
                 onEdit: () => _showEditRoleDetailsModal(context, role),
@@ -420,7 +422,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               )
             else if (role == UserRole.CONSUMER)
               _buildRoleProfileCard(
-                title: '🛒 Consumer Delivery Profile',
+                title: 'Consumer Delivery Profile',
                 icon: Icons.home_work_outlined,
                 color: AppColors.secondaryOrange,
                 onEdit: () => _showEditRoleDetailsModal(context, role),
@@ -433,7 +435,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               )
             else if (role == UserRole.DELIVERY_PARTNER)
               _buildRoleProfileCard(
-                title: '🛵 Delivery Rider & Vehicle Profile',
+                title: 'Delivery Rider & Vehicle Profile',
                 icon: Icons.two_wheeler_outlined,
                 color: AppColors.info,
                 onEdit: () => _showEditRoleDetailsModal(context, role),
@@ -447,7 +449,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               )
             else
               _buildRoleProfileCard(
-                title: '🛡️ Platform Administrator Profile',
+                title: 'Platform Administrator Profile',
                 icon: Icons.shield_outlined,
                 color: Colors.purple,
                 onEdit: () => _showEditRoleDetailsModal(context, role),
@@ -460,34 +462,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 ],
               ),
 
-            const SizedBox(height: 20),
-
-            // Account Actions Card
-            Card(
-              child: Column(
-                children: [
-                  ListTile(
-                    leading: const Icon(Icons.swap_horiz_rounded, color: AppColors.secondaryOrange),
-                    title: const Text('Switch Role Portal', style: TextStyle(fontWeight: FontWeight.bold)),
-                    subtitle: const Text('Switch between Farmer, Consumer, Delivery & Admin'),
-                    trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                    onTap: () async {
-                      await ref.read(authProvider.notifier).logout();
-                      if (context.mounted) {
-                        context.go('/role-selection');
-                      }
-                    },
-                  ),
-                  const Divider(height: 1),
-                  ListTile(
-                    leading: const Icon(Icons.security_outlined, color: AppColors.primaryGreen),
-                    title: const Text('Security & Security Audit Log', style: TextStyle(fontWeight: FontWeight.bold)),
-                    subtitle: const Text('JWT Auth Tokens & RBAC Protection Active'),
-                    trailing: const Icon(Icons.verified_user, color: AppColors.success, size: 18),
-                  ),
-                ],
-              ),
-            ),
             const SizedBox(height: 28),
 
             // Sign Out Button

@@ -17,6 +17,181 @@ class AdminDashboardScreen extends ConsumerStatefulWidget {
 class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
   String _orderFilter = 'All';
 
+  final List<Map<String, String>> _adminAccounts = [
+    {
+      'name': 'Tharun Pranav (Root Admin)',
+      'email': 'tharunpranavt@vayal2veedu.com',
+      'division': 'South Division (Master Control)',
+      'status': 'SUPER_ADMIN',
+    },
+  ];
+
+  void _showCreateAdminModal(BuildContext context) {
+    final nameCtrl = TextEditingController();
+    final emailCtrl = TextEditingController();
+    final passCtrl = TextEditingController();
+    final divCtrl = TextEditingController(text: 'Quality Audit & Operations');
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(ctx).viewInsets.bottom,
+        ),
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(10))),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text('Provision New Administrator', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.pop(ctx)),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: nameCtrl,
+                  decoration: const InputDecoration(labelText: 'Administrator Name', prefixIcon: Icon(Icons.person_outline)),
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: emailCtrl,
+                  decoration: const InputDecoration(labelText: 'Admin Email Address', prefixIcon: Icon(Icons.email_outlined)),
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: passCtrl,
+                  obscureText: true,
+                  decoration: const InputDecoration(labelText: 'Temporary Access Password', prefixIcon: Icon(Icons.lock_outline)),
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: divCtrl,
+                  decoration: const InputDecoration(labelText: 'Department / Division', prefixIcon: Icon(Icons.business_outlined)),
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primaryGreen,
+                    minimumSize: const Size(double.infinity, 48),
+                  ),
+                  onPressed: () {
+                    final name = nameCtrl.text.trim();
+                    final email = emailCtrl.text.trim();
+                    if (name.isNotEmpty && email.isNotEmpty) {
+                      setState(() {
+                        _adminAccounts.add({
+                          'name': name,
+                          'email': email,
+                          'division': divCtrl.text.trim(),
+                          'status': 'CO_ADMIN',
+                        });
+                      });
+                      Navigator.pop(ctx);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Administrator account "$name" created successfully!')),
+                      );
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Please enter valid administrator details.')),
+                      );
+                    }
+                  },
+                  icon: const Icon(Icons.person_add_alt_1),
+                  label: const Text('Provision & Register Admin Account'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showAdminAccountsModal(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx2, setModalState) => Container(
+          padding: const EdgeInsets.all(20),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(10))),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text('Platform Administrators (${_adminAccounts.length})', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+                  ),
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primaryGreen,
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      ),
+                      onPressed: () {
+                        Navigator.pop(ctx);
+                        _showCreateAdminModal(context);
+                      },
+                      icon: const Icon(Icons.add, size: 16),
+                      label: const Text('Add Admin', style: TextStyle(fontSize: 12)),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
+              ..._adminAccounts.map(
+                (a) => Card(
+                  margin: const EdgeInsets.only(bottom: 10),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                  child: ListTile(
+                    leading: const CircleAvatar(
+                      backgroundColor: AppColors.primaryGreen,
+                      child: Icon(Icons.shield_outlined, color: Colors.white, size: 20),
+                    ),
+                    title: Text(a['name'] as String, style: const TextStyle(fontWeight: FontWeight.bold)),
+                    subtitle: Text('Email: ${a['email']}\nDivision: ${a['division']}'),
+                    trailing: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(color: AppColors.primaryGreen.withOpacity(0.15), borderRadius: BorderRadius.circular(8)),
+                      child: Text(a['status'] as String, style: const TextStyle(color: AppColors.primaryGreen, fontWeight: FontWeight.bold, fontSize: 10)),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   void _showFarmerAccountsModal(BuildContext context) {
     final farmers = [
       {'name': 'Green Field Organic Farm', 'farmer': 'Tharun Pranav', 'location': 'Madurai Sector 4', 'status': 'VERIFIED', 'products': 3},
@@ -308,6 +483,14 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
               subtitle: Text('${products.length} produce listings active'),
               trailing: const Icon(Icons.arrow_forward_ios, size: 16),
               onTap: () => context.push('/farmer/products'),
+            ),
+            const Divider(),
+            ListTile(
+              leading: const Icon(Icons.admin_panel_settings_outlined, color: Colors.purple),
+              title: const Text('Platform Administrator Accounts', style: TextStyle(fontWeight: FontWeight.bold)),
+              subtitle: Text('${_adminAccounts.length} active admin account(s) • Provision new admin'),
+              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+              onTap: () => _showAdminAccountsModal(context),
             ),
 
             const SizedBox(height: 24),

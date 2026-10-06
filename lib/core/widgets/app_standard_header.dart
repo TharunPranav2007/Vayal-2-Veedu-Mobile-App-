@@ -135,10 +135,44 @@ class AppStandardHeader extends ConsumerWidget implements PreferredSizeWidget {
           ),
         ],
         if (showProfile) ...[
-          IconButton(
-            tooltip: 'My Profile',
-            icon: const Icon(Icons.account_circle_outlined, size: 26),
-            onPressed: () => context.push('/profile'),
+          PopupMenuButton<String>(
+            tooltip: 'Account & Navigation Options',
+            icon: const Icon(Icons.account_circle_outlined, size: 26, color: Colors.white),
+            offset: const Offset(0, 48),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+            onSelected: (value) async {
+              if (value == 'profile') {
+                context.push('/profile');
+              } else if (value == 'logout') {
+                await ref.read(authProvider.notifier).logout();
+                if (context.mounted) {
+                  context.go('/role-selection');
+                }
+              }
+            },
+            itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+              const PopupMenuItem<String>(
+                value: 'profile',
+                child: Row(
+                  children: [
+                    Icon(Icons.person_outline, color: AppColors.primaryGreen, size: 20),
+                    SizedBox(width: 12),
+                    Text('My Profile', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+                  ],
+                ),
+              ),
+              const PopupMenuDivider(),
+              const PopupMenuItem<String>(
+                value: 'logout',
+                child: Row(
+                  children: [
+                    Icon(Icons.logout, color: AppColors.error, size: 20),
+                    SizedBox(width: 12),
+                    Text('Log Out', style: TextStyle(color: AppColors.error, fontWeight: FontWeight.bold, fontSize: 14)),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
         const SizedBox(width: 4),

@@ -13,6 +13,7 @@ class DeliveryDashboardScreen extends ConsumerWidget {
   void _showJobDetailModal(BuildContext context, WidgetRef ref, OrderModel ord) {
     showModalBottomSheet(
       context: context,
+      useRootNavigator: true,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (ctx) => Container(
@@ -91,22 +92,21 @@ class DeliveryDashboardScreen extends ConsumerWidget {
                     const SizedBox(height: 2),
                     const Text('Field Rd, Sector 4, Madurai Farm Belt - 625001', style: TextStyle(color: AppColors.textMuted, fontSize: 12)),
                     const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        OutlinedButton.icon(
-                          onPressed: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Calling Farmer (+91 9876543210)...')),
-                            );
-                          },
-                          icon: const Icon(Icons.phone, size: 16),
-                          label: const Text('Call Farm'),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: AppColors.primaryGreen,
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                          ),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: OutlinedButton.icon(
+                        onPressed: () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Calling Farmer (+91 9876543210)...')),
+                          );
+                        },
+                        icon: const Icon(Icons.phone, size: 16),
+                        label: const Text('Call Farm'),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppColors.primaryGreen,
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                         ),
-                      ],
+                      ),
                     ),
                   ],
                 ),
@@ -140,22 +140,21 @@ class DeliveryDashboardScreen extends ConsumerWidget {
                     const SizedBox(height: 2),
                     const Text('12 Harvest Lane, Farm District, Madurai - 625001', style: TextStyle(color: AppColors.textMuted, fontSize: 12)),
                     const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        OutlinedButton.icon(
-                          onPressed: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Calling Customer (+91 9123456789)...')),
-                            );
-                          },
-                          icon: const Icon(Icons.phone, size: 16),
-                          label: const Text('Call Customer'),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: AppColors.info,
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                          ),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: OutlinedButton.icon(
+                        onPressed: () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Calling Customer (+91 9123456789)...')),
+                          );
+                        },
+                        icon: const Icon(Icons.phone, size: 16),
+                        label: const Text('Call Customer'),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppColors.info,
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                         ),
-                      ],
+                      ),
                     ),
                   ],
                 ),

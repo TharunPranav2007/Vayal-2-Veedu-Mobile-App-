@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/app_standard_header.dart';
+import '../../../core/utils/product_image_helper.dart';
 import '../../../app/providers/products_provider.dart';
 import '../../../app/providers/cart_provider.dart';
 
@@ -214,7 +215,11 @@ class _ConsumerHomeScreenState extends ConsumerState<ConsumerHomeScreen> {
                                     height: 110,
                                     width: double.infinity,
                                     child: Image.network(
-                                      p.imageUrls.isNotEmpty ? p.imageUrls.first : '',
+                                      ProductImageHelper.getImageUrl(
+                                        name: p.name,
+                                        categoryName: p.categoryName,
+                                        imageUrls: p.imageUrls,
+                                      ),
                                       fit: BoxFit.cover,
                                       errorBuilder: (context, error, stackTrace) => Container(
                                         color: AppColors.surfaceSubtleGreen,

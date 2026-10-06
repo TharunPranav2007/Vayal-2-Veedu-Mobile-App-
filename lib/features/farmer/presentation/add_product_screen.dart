@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/product_image_helper.dart';
 import '../../../app/providers/products_provider.dart';
 import '../../products/domain/product_model.dart';
 
@@ -20,6 +21,7 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
   final _stockController = TextEditingController();
   String _selectedCategory = 'Vegetables';
   String _selectedUnit = 'kg';
+  bool _photoCaptured = false;
 
   final List<String> _categories = [
     'Vegetables',
@@ -41,6 +43,11 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
 
   void _submitProduct() {
     if (_formKey.currentState!.validate()) {
+      final imgUrl = ProductImageHelper.getImageUrl(
+        name: _nameController.text.trim(),
+        categoryName: _selectedCategory,
+      );
+
       final newProduct = Product(
         id: 'p-${DateTime.now().millisecondsSinceEpoch}',
         farmerId: 'f1',
@@ -56,6 +63,7 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
         stock: double.parse(_stockController.text.trim()),
         averageRating: 5.0,
         totalReviews: 1,
+        imageUrls: [imgUrl],
       );
 
       ref.read(productsProvider.notifier).addProduct(newProduct);
@@ -168,12 +176,34 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
               const SizedBox(height: 24),
               OutlinedButton.icon(
                 onPressed: () {
+                  setState(() => _photoCaptured = true);
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Farm photo captured successfully!')),
+                    const SnackBar(content: Text('Farm produce photo captured & assigned successfully!')),
                   );
                 },
-                icon: const Icon(Icons.camera_alt_outlined),
-                label: const Text('Capture / Upload Produce Photo'),
+                icon: Icon(_photoCaptured ? Icons.check_circle : Icons.camera_alt_outlined, color: _photoCaptured ? AppColors.primaryGreen : null),
+                label: Text(_photoCaptured ? 'Produce Photo Verified ✓' : 'Capture / Upload Produce Photo'),
+              ),
+              const SizedBox(height: 14),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(14),
+                child: SizedBox(
+                  height: 140,
+                  width: double.infinity,
+                  child: Image.network(
+                    ProductImageHelper.getImageUrl(
+                      name: _nameController.text.trim(),
+                      categoryName: _selectedCategory,
+                    ),
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Container(
+                      color: AppColors.surfaceSubtleGreen,
+                      child: const Center(
+                        child: Icon(Icons.eco, size: 48, color: AppColors.primaryGreen),
+                      ),
+                    ),
+                  ),
+                ),
               ),
               const SizedBox(height: 32),
               ElevatedButton(
