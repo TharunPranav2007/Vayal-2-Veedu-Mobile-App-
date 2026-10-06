@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/app_standard_header.dart';
-import '../../../core/utils/product_image_helper.dart';
+import '../../../core/widgets/produce_image_widget.dart';
 import '../../../app/providers/products_provider.dart';
 import '../../../app/providers/cart_provider.dart';
 
@@ -211,42 +211,13 @@ class _ConsumerHomeScreenState extends ConsumerState<ConsumerHomeScreen> {
                               // Product Thumbnail Container
                               Stack(
                                 children: [
-                                  SizedBox(
-                                    height: 110,
+                                  ProduceImageWidget(
+                                    productName: p.name,
+                                    categoryName: p.categoryName,
+                                    imageUrls: p.imageUrls,
                                     width: double.infinity,
-                                    child: Image.network(
-                                      ProductImageHelper.getImageUrl(
-                                        name: p.name,
-                                        categoryName: p.categoryName,
-                                        imageUrls: p.imageUrls,
-                                      ),
-                                      fit: BoxFit.cover,
-                                      errorBuilder: (context, error, stackTrace) => Container(
-                                        color: AppColors.surfaceSubtleGreen,
-                                        child: Center(
-                                          child: Icon(
-                                            p.categoryName == 'Greens'
-                                                ? Icons.grass
-                                                : p.categoryName == 'Fruits'
-                                                    ? Icons.apple
-                                                    : p.categoryName == 'Grains'
-                                                        ? Icons.grain
-                                                        : Icons.eco,
-                                            size: 52,
-                                            color: AppColors.primaryGreen,
-                                          ),
-                                        ),
-                                      ),
-                                      loadingBuilder: (context, child, loadingProgress) {
-                                        if (loadingProgress == null) return child;
-                                        return Container(
-                                          color: AppColors.surfaceSubtleGreen,
-                                          child: const Center(
-                                            child: CircularProgressIndicator(strokeWidth: 2),
-                                          ),
-                                        );
-                                      },
-                                    ),
+                                    height: 110,
+                                    borderRadius: 0,
                                   ),
                                   Positioned(
                                     top: 8,

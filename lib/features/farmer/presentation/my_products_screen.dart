@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/produce_image_widget.dart';
 import '../../../app/providers/products_provider.dart';
 
 class MyProductsScreen extends ConsumerWidget {
@@ -50,20 +51,13 @@ class MyProductsScreen extends ConsumerWidget {
                     padding: const EdgeInsets.all(16),
                     child: Row(
                       children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(12),
-                          child: SizedBox(
-                            width: 65,
-                            height: 65,
-                            child: Image.network(
-                              product.imageUrls.isNotEmpty ? product.imageUrls.first : '',
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) => Container(
-                                color: AppColors.surfaceSubtleGreen,
-                                child: const Icon(Icons.eco, color: AppColors.primaryGreen, size: 36),
-                              ),
-                            ),
-                          ),
+                        ProduceImageWidget(
+                          productName: product.name,
+                          categoryName: product.categoryName,
+                          imageUrls: product.imageUrls,
+                          width: 65,
+                          height: 65,
+                          borderRadius: 12,
                         ),
                         const SizedBox(width: 14),
                         Expanded(

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/widgets/app_standard_header.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/produce_image_widget.dart';
 import '../../../app/providers/auth_provider.dart';
 import '../../../app/providers/products_provider.dart';
 import '../../../app/providers/orders_provider.dart';
@@ -138,7 +139,24 @@ class _FarmerDashboardScreenState extends ConsumerState<FarmerDashboardScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('• ${item.productName} (x${item.quantity.toStringAsFixed(0)})', style: const TextStyle(fontSize: 13)),
+                    Expanded(
+                      child: Row(
+                        children: [
+                          ProduceImageWidget(
+                            productName: item.productName,
+                            categoryName: '',
+                            width: 28,
+                            height: 28,
+                            borderRadius: 6,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text('${item.productName} (x${item.quantity.toStringAsFixed(0)})', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
                     Text('₹${item.totalPrice.toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
                   ],
                 ),

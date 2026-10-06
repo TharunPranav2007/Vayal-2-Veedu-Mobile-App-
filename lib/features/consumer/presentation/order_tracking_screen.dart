@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/widgets/app_standard_header.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/produce_image_widget.dart';
 import '../../../app/providers/orders_provider.dart';
 import '../../orders/domain/order_model.dart';
 
@@ -393,8 +394,14 @@ class _OrderTrackingScreenState extends ConsumerState<OrderTrackingScreen> {
                             Expanded(
                               child: Row(
                                 children: [
-                                  const Icon(Icons.eco_outlined, color: AppColors.primaryGreen, size: 18),
-                                  const SizedBox(width: 8),
+                                  ProduceImageWidget(
+                                    productName: item.productName,
+                                    categoryName: '',
+                                    width: 32,
+                                    height: 32,
+                                    borderRadius: 6,
+                                  ),
+                                  const SizedBox(width: 10),
                                   Expanded(
                                     child: Text(
                                       '${item.productName} (x${item.quantity.toStringAsFixed(0)})',

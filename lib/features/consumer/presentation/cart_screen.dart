@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../core/utils/product_image_helper.dart';
+import '../../../core/widgets/produce_image_widget.dart';
 import '../../../app/providers/cart_provider.dart';
 
 class CartScreen extends ConsumerWidget {
@@ -66,24 +66,13 @@ class CartScreen extends ConsumerWidget {
                           padding: const EdgeInsets.all(12),
                           child: Row(
                             children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(12),
-                                child: SizedBox(
-                                  width: 60,
-                                  height: 60,
-                                  child: Image.network(
-                                    ProductImageHelper.getImageUrl(
-                                      name: p.name,
-                                      categoryName: p.categoryName,
-                                      imageUrls: p.imageUrls,
-                                    ),
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (context, error, stackTrace) => Container(
-                                      color: AppColors.surfaceSubtleGreen,
-                                      child: const Icon(Icons.eco_rounded, color: AppColors.primaryGreen, size: 32),
-                                    ),
-                                  ),
-                                ),
+                              ProduceImageWidget(
+                                productName: p.name,
+                                categoryName: p.categoryName,
+                                imageUrls: p.imageUrls,
+                                width: 60,
+                                height: 60,
+                                borderRadius: 12,
                               ),
                               const SizedBox(width: 12),
                               Expanded(

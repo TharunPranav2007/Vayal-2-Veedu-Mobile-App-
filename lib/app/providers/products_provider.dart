@@ -52,7 +52,7 @@ class ProductsNotifier extends StateNotifier<List<Product>> {
             averageRating: 4.7,
             totalReviews: 18,
             imageUrls: [
-              'https://images.unsplash.com/photo-1598170845058-12ef4a457939?w=600&auto=format&fit=crop&q=80',
+              'https://images.unsplash.com/photo-1590868309235-ea34bed7bd7f?w=600&auto=format&fit=crop&q=80',
             ],
           ),
           Product(
@@ -103,7 +103,7 @@ class ProductsNotifier extends StateNotifier<List<Product>> {
             averageRating: 4.8,
             totalReviews: 15,
             imageUrls: [
-              'https://images.unsplash.com/photo-1563565375-f3fdfdbefa83?w=600&auto=format&fit=crop&q=80',
+              'https://images.unsplash.com/photo-1526470608268-f674ce90ebd4?w=600&auto=format&fit=crop&q=80',
             ],
           ),
           Product(
