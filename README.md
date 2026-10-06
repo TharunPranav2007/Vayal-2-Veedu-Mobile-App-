@@ -21,6 +21,7 @@
 ## 📖 Table of Contents
 - [📌 Project Overview](#-project-overview)
 - [📊 App Review Presentation & Visual Showcase](#-app-review-presentation--visual-showcase)
+- [🚀 What's New in Version 2.2](#-whats-new-in-version-22)
 - [🌟 What's New in Version 2.1](#-whats-new-in-version-21)
 - [✨ Features in Version 2.0](#-features-in-version-20)
 - [⚡ Multi-Role Matrix & Demo Credentials](#-multi-role-matrix--demo-credentials)
@@ -62,6 +63,25 @@
 | **Consumer Marketplace** | ![Consumer Marketplace](App%20Screenshots/Consumer%20Module%20-%201.png) | HD produce catalog, live 5% GST itemization, farm origin attribution, and 5-step dispatch tracking |
 | **Delivery Logistics** | ![Delivery Job Inspector](App%20Screenshots/Delivery%20Job%20Details.png) | Interactive bottom-sheet job inspector, farm/customer contact shortcuts, and pickup/delivery toggles |
 | **Admin Governance** | ![Admin Analytics](App%20Screenshots/Admin%20Module%20-%201.png) | Platform-wide GMV metrics, farmer land verification, fleet moderation, and single-admin security |
+
+---
+
+## 🚀 What's New in Version 2.2
+
+> [!IMPORTANT]
+> **Version 2.2 Major Release & Presentation Suite**
+
+### 📊 1. Native Widescreen PowerPoint Presentation (`Vayal_2_Veedu_App_Review.pptx`)
+- Built a native 16:9 9-slide PowerPoint deck featuring all 23 high-resolution app screenshots paired with concise operational summaries for evaluators.
+
+### 🖥️ 2. Interactive Web Presentation Slide Deck (`presentation_slides.html`)
+- Integrated a standalone, interactive HTML slideshow equipped with a click-to-zoom Lightbox modal (click any screenshot to inspect fine details) and keyboard arrow navigation.
+
+### 🖼️ 3. Complete 23 High-Resolution Screenshots Audit
+- Organized and verified 100% screenshot coverage across all 4 user roles (*Different Users Login*, *Role Profiles*, *Farmer Operations*, *Consumer Marketplace & Tracking*, *Delivery Logistics*, *Admin Governance*).
+
+### 🛠️ 4. Layout Stability & Zero-Overflow Assurance
+- Resolved layout flex-fit issues in modal dialogs (`delivery_dashboard_screen.dart`, `farmer_dashboard_screen.dart`), achieving 100% test pass rate on Flutter unit & widget test suites (`7/7 tests passed`).
 
 ---
 
